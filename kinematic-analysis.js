@@ -138,62 +138,123 @@ Table = function () {
 Table.prototype = new Sim.Object();
 
 Table.prototype.init = function (params) {
- var group = new THREE.Object3D
+  var group = new THREE.Object3D
     , geometry = new THREE.CubeGeometry(2, 2, 1, 32, 32, 32)
     , material = new THREE.MeshPhongMaterial({ color: 0x101510 , wireframe: false})
     , table = new THREE.Mesh(geometry, material);
-  group.add(table);
-
-  group.position.z = .5;
-
-  // Add the poses
 
   this.setObject3D(group);
+
+  // Move the table to level with the floor
+  table.position.z = .5;
+  group.add(table);
+
+  // Add the poses, leveled with the table
+  var poses = new PoseGroup();
+  poses.init(Table.POSES);
+
+  poses.object3D.position.z = 1;
+
+  this.addChild(poses);
 }
 
-TABLE.POSES = [{
+Table.POSES = [{
   id: 0,
   reachable: 0,
-  position: {x: -0.5, y: -0.5, z: 1},
+  position: {x: -0.5, y: -0.5, z: 0},
   orientation: {x: 0, y: 0, z: 0, w: 0}
 }, {
   id: 1,
   reachable: 0,
-  position: {x: 0, y: -0.5, z: 1},
+  position: {x: 0, y: -0.5, z: 0},
   orientation: {x: 0, y: 0, z: 0, w: 0},
 }, {
   id: 2,
   reachable: 0,
-  position: {x: 0.5, y: -0.5, z: 1},
+  position: {x: 0.5, y: -0.5, z: 0},
   orientation: {x: 0, y: 0, z: 0, w: 0},
 }, {
   id: 3,
   reachable: 0,
-  position: {x: -0.5, y: 0, z: 1},
+  position: {x: -0.5, y: 0, z: 0},
   orientation: {x: 0, y: 0, z: 0, w: 0},
 }, {
   id: 4,
   reachable: 0,
-  position: {x: 0, y: 0, z: 1},
+  position: {x: 0, y: 0, z: 0},
   orientation: {x: 0, y: 0, z: 0, w: 0},
 }, {
   id: 5,
   reachable: 0,
-  position: {x: 0.5, y: 0, z: 1},
+  position: {x: 0.5, y: 0, z: 0},
   orientation: {x: 0, y: 0, z: 0, w: 0},
 }, {
   id: 6,
   reachable: 0,
-  position: {x: -0.5, y: 0.5, z: 1},
+  position: {x: -0.5, y: 0.5, z: 0},
   orientation: {x: 0, y: 0, z: 0, w: 0},
 }, {
   id: 7,
   reachable: 0,
-  position: {x: 0, y: 0.5, z: 1},
+  position: {x: 0, y: 0.5, z: 0},
   orientation: {x: 0, y: 0, z: 0, w: 0},
 }, {
   id: 8,
   reachable: 0,
-  position: {x: 0.5, y: 0.5, z: 1},
+  position: {x: 0.5, y: 0.5, z: 0},
   orientation: {x: 0, y: 0, z: 0, w: 0},
 }];
+
+
+//
+// A pose set, all grouped together
+//
+
+PoseGroup = function () {
+  return Sim.Object.call(this);
+}
+PoseGroup.prototype = new Sim.Object();
+
+PoseGroup.prototype.init = function (poses) {
+  // Group all poses in a single object
+  this.setObject3D(new THREE.Object3D());
+
+  // Let each point add itself to the group
+  for (var i = 0; i < poses.length; i++) {
+    var point = new PosePoint();
+    point.init({root: this.object3D, data: poses[i]});
+  }
+}
+
+
+//
+// A single pose object
+//
+
+PosePoint = function () {
+  return Sim.Object.call(this);
+}
+PosePoint.prototype = new Sim.Object();
+
+PosePoint.MATERIAL = new THREE.MeshBasicMaterial({color: 0xffffff});
+PosePoint.RADIUS = 0.05;
+PosePoint.COLOR_MAP = {
+    0: new THREE.MeshBasicMaterial({color: 0xffffff})
+  , 1: new THREE.MeshBasicMaterial({color: 0x00ff00})
+  , 2: new THREE.MeshBasicMaterial({color: 0xff0000})
+};
+
+PosePoint.prototype.init = function (params) {
+  this.data = params.data;
+
+  // Data shortcuts
+  this.reachable = this.data.reachable;
+
+  // Create the point
+  var geometry = new THREE.SphereGeometry(PosePoint.RADIUS, 8, 8)
+    , point = new THREE.Mesh(geometry, PosePoint.COLOR_MAP[this.reachable]);
+
+  point.position = params.data.position;
+
+  params.root.add(point);
+}
