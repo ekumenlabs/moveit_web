@@ -9,26 +9,57 @@
     <style type="text/css">
       <!-- Some blank space and colors in place of content -->
       .row-fluid div {
-        height: 200px;
+        height: 600px;
       }
-	  #control-panel {
+      #control-panel {
         background-color: #a6bfba;
       }
-	  #scene {
+      #scene {
         background-color: #de4124;
+        height: 600px;
       }
     </style>
   </head>
   <body>
 
+    <!-- Main structure -->
     <div class="container-fluid">
       <div class="row-fluid">
 
+        <!-- The control panel -->
         <div id="control-panel" class="span3">
+
+          <!-- Simplest robot selection -->
+          <button class="btn" data-target="#test-modal" data-toggle="modal">Select Robot</button>
+
         </div>
 
         <div id="scene" class="span9"></div>
 
+      </div>
+    </div>
+
+    <!-- Robot select widget -->
+    <div id="test-modal" class="modal hide fade">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3>Available robots</h3>
+      </div>
+      <div class="modal-body">
+        <ul class="thumbnails">
+          <li><a href="#" class="thumbnail">
+              <img src="http://www.dfrobot.com/image/cache/data/ROB0036/ROB0036-140x140.jpg" class="img-rounded">
+          </a></li>
+          <li><a href="#" class="thumbnail">
+              <img src="http://thumbs4.ebaystatic.com/m/mncw6eKmocCLx4idzrFaREg/140.jpg" class="img-rounded">
+          </a></li>
+          <li><a href="#" class="thumbnail">
+              <img src="http://www.a3bs.com/thumblibrary/W64028RA/W64028RA_01_140_140_Robotic-Arm-Edge.jpg" class="img-rounded">
+          </a></li>
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <a href="#" class="btn" data-dismiss="modal">Close</a>
       </div>
     </div>
 
