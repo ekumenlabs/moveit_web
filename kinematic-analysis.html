@@ -32,9 +32,6 @@
       </div>
     </div>
 
-    <!-- Note the two jQuery versions... this will be a problem -->
-	<script src="libs/jquery-1.6.4.js"></script>
-    <script src="libs/jquery.mousewheel.js"></script>
 	<script src="libs/Three.js"></script>
 	<script src="libs/RequestAnimationFrame.js"></script>
 	<script src="libs/Tween.js"></script>
@@ -43,6 +40,8 @@
 	<script src="libs/sim/interaction.js"></script>
 
     <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
+    <script src="libs/jquery.mousewheel.js"></script>
+
     <script src="libs/bootstrap/js/bootstrap.min.js"></script>
 
     <script src="kinematic-analysis.js"></script>
@@ -50,7 +49,7 @@
 	  var app = null;
 
 	  $(document).ready(function() {
-	      app = new KineticAnalysisApp();
+	      app = new KinematicAnalysisApp();
 	      app.init({ container: document.getElementById('scene') });
 	      app.run();
       });
