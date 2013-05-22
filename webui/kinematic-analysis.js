@@ -29,6 +29,8 @@ KinematicAnalysisApp.prototype.init = function (params) {
   table.init();
   this.addObject(table);
 
+  TABLE = table // DEBUG
+
   // Keep track of scene dragging
   this.lastX = 0;
   this.lastY = 0;
@@ -219,11 +221,49 @@ PoseGroup.prototype.init = function (poses) {
   // Group all poses in a single object
   this.setObject3D(new THREE.Object3D());
 
+  // Keep a reference, by ID, to the pose objects in the group
+  this.poses = {};
+
   // Let each point add itself to the group
   for (var i = 0; i < poses.length; i++) {
-    var point = new PosePoint();
-    point.init({root: this.object3D, data: poses[i]});
+    var point = new PosePoint()
+      , pose = poses[i];
+
+    point.init({root: this.object3D, data: pose});
+
+    this.poses[pose.id] = point;
   }
+}
+
+PoseGroup.prototype.updatePoses = function (newPoses) {
+  newPoses = newPoses || [];
+
+  for (var i = 0; i < newPoses.length; i++) {
+    var newPose = newPoses[i]
+      , point = this.poses[newPose.id];
+
+    if (point.reachable !== newPose.reachable) {
+      console.log('Updating pose ID=' + newPose.id);
+
+      // Lose the old point
+      point.destroy();
+
+      // Create a new point with the new data
+      point = new PosePoint();
+      point.init({root: this.object3D, data: newPose});
+
+      // Update the point reference
+      this.poses[newPose.id] = point;
+    }
+  }
+}
+
+// TEST the pose coloring.
+var testUpdatePoses = function () {
+  var pose = Table.POSES[4]
+  pose.reachable = 1;
+
+  TABLE.children[0].updatePoses([pose]);
 }
 
 
@@ -246,6 +286,7 @@ PosePoint.COLOR_MAP = {
 
 PosePoint.prototype.init = function (params) {
   this.data = params.data;
+  this.root = params.root;
 
   // Data shortcuts
   this.reachable = this.data.reachable;
@@ -256,5 +297,12 @@ PosePoint.prototype.init = function (params) {
 
   point.position = params.data.position;
 
-  params.root.add(point);
+  this.mesh = point;
+
+  this.root.add(point);
+}
+
+
+PosePoint.prototype.destroy = function () {
+  this.root.remove(this.mesh);
 }
