@@ -37,7 +37,7 @@ KinematicAnalysisApp.prototype.init = function (params) {
   this.mouseDown = false;
 
   // Initialize a proxy to the MoveIt! backend
-  this.moveit = MoveitBackend({
+  this.moveit = new MoveitBackend({
     url: '',
 
     // UGLY UGLY UGLY
