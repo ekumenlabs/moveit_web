@@ -35,6 +35,14 @@ KinematicAnalysisApp.prototype.init = function (params) {
   this.lastX = 0;
   this.lastY = 0;
   this.mouseDown = false;
+
+  // Initialize a proxy to the MoveIt! backend
+  this.moveit = MoveitBackend({
+    url: '',
+
+    // UGLY UGLY UGLY
+    update: function (poses) { table.children[0].updatePoses(poses) }
+  });
 }
 
 
@@ -305,4 +313,78 @@ PosePoint.prototype.init = function (params) {
 
 PosePoint.prototype.destroy = function () {
   this.root.remove(this.mesh);
+}
+
+
+//
+// MoveIt! backend proxy
+//
+
+MoveitBackend = function (params) {
+  // Delegate networking calls to the network manager object
+  this.network = new NetworkManager(params);
+
+  // Where to callback to, when the new poses are ready
+  this.updateCallback = params.update;
+}
+MoveitBackend.prototype = {}
+
+MoveitBackend.prototype.go = function () {
+  var that = this;
+
+  // The backend knows what to do
+  this.network.go(function () {
+    // Get the new poses when the "go" call is done
+    this.network.getAllPoses(function (poses) {
+      // Callback to application code to update the poses
+      that.updateCallback(poses);
+    });
+  });
+}
+
+
+//
+// Network-solutions object
+//
+
+NetworkManager = function (params) {
+  this.endpoint = params.url;
+}
+NetworkManager.prototype = {}
+
+NetworkManager.prototype.go = function (fn) {
+  // Stub implementation
+
+  // Implement AJAX request to the backend to trigger recomputation
+  //
+  // on complete --> fn()
+  fn();
+}
+
+NetworkManager.prototype.getAllPoses = function (fn) {
+  // Stub implementation
+
+  // Implement the AJAX request to bring the new poses
+  //
+  // on complete --> fn(newPoses)
+
+  var newPoses = TABLE.POSES // THIS SHOULD BE THE server POSES
+    , poses = [];
+
+
+  // Re-format the returned poses
+  for (var i = 0; i < newPoses.length; i++) {
+    poses[i] = this.formatPose(newPoses[i]);
+  }
+
+  fn(poses);
+}
+
+NetworkManager.prototype.formatPose = function (remotePose) {
+  var pose = {};
+  pose.id = remotePose.id;
+  pose.reachable = remotePose.reachable;
+  pose.position = remotePose.pose.position;
+  pose.orientation = remotePose.pose.orientation;
+  return pose;
 }
