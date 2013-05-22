@@ -41,7 +41,9 @@ KinematicAnalysisApp.prototype.init = function (params) {
     url: '',
 
     // UGLY UGLY UGLY
-    update: function (poses) { table.children[0].updatePoses(poses) }
+    update: function (poses) {
+      table.children[0].updatePoses(poses)
+    }
   });
 }
 
@@ -251,9 +253,7 @@ PoseGroup.prototype.updatePoses = function (newPoses) {
       , point = this.poses[newPose.id];
 
     if (point.reachable !== newPose.reachable) {
-      console.log('Updating pose ID=' + newPose.id);
-
-      // Lose the old point
+      // Loose the old point
       point.destroy();
 
       // Create a new point with the new data
@@ -335,7 +335,7 @@ MoveitBackend.prototype.go = function () {
   // The backend knows what to do
   this.network.go(function () {
     // Get the new poses when the "go" call is done
-    this.network.getAllPoses(function (poses) {
+    that.network.getAllPoses(function (poses) {
       // Callback to application code to update the poses
       that.updateCallback(poses);
     });
@@ -358,6 +358,9 @@ NetworkManager.prototype.go = function (fn) {
   // Implement AJAX request to the backend to trigger recomputation
   //
   // on complete --> fn()
+
+  console.log('GO!');
+
   fn();
 }
 
@@ -367,10 +370,13 @@ NetworkManager.prototype.getAllPoses = function (fn) {
   // Implement the AJAX request to bring the new poses
   //
   // on complete --> fn(newPoses)
-
-  var newPoses = TABLE.POSES // THIS SHOULD BE THE server POSES
+  for (var i = 0; i < Table.POSES.length; i++) {
+    // New random reachable state
+    var n = parseInt(Math.random() * 10) % 3;
+    Table.POSES[i].reachable = n;
+  }
+  var newPoses = Table.POSES
     , poses = [];
-
 
   // Re-format the returned poses
   for (var i = 0; i < newPoses.length; i++) {
@@ -382,9 +388,14 @@ NetworkManager.prototype.getAllPoses = function (fn) {
 
 NetworkManager.prototype.formatPose = function (remotePose) {
   var pose = {};
-  pose.id = remotePose.id;
-  pose.reachable = remotePose.reachable;
-  pose.position = remotePose.pose.position;
-  pose.orientation = remotePose.pose.orientation;
-  return pose;
+
+  // Real implementation:
+  //
+  // pose.id = remotePose.id;
+  // pose.reachable = remotePose.reachable;
+  // pose.position = remotePose.pose.position;
+  // pose.orientation = remotePose.pose.orientation;
+
+  // Mock (pass through) implementation
+  return remotePose;
 }
