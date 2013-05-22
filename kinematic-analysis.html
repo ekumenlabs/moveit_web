@@ -5,12 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="libs/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
     <link href="libs/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet">
+
+    <style type="text/css">
+      <!-- Some blank space and colors in place of content -->
+      .row-fluid div {
+        height: 200px;
+      }
+	  #control-panel {
+        background-color: #a6bfba;
+      }
+	  #scene {
+        background-color: #de4124;
+      }
+    </style>
   </head>
   <body>
 
     <div class="container-fluid">
+      <div class="row-fluid">
 
+        <div id="control-panel" class="span3">
+        </div>
 
+        <div id="scene" class="span9"></div>
+
+      </div>
     </div>
 
     <!-- Note the two jQuery versions... this will be a problem -->
@@ -25,5 +44,16 @@
 
     <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
     <script src="libs/bootstrap/js/bootstrap.min.js"></script>
+
+    <script src="kinematic-analysis.js"></script>
+	<script>
+	  var app = null;
+
+	  $(document).ready(function() {
+	      app = new KineticAnalysisApp();
+	      app.init({ container: document.getElementById('scene') });
+	      app.run();
+      });
+	</script>
   </body>
 </html>
