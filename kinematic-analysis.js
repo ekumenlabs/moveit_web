@@ -24,6 +24,11 @@ KinematicAnalysisApp.prototype.init = function (params) {
   floor.init();
   this.addObject(floor);
 
+  // Create the table in the center
+  var table = new Table();
+  table.init();
+  this.addObject(table);
+
   // Keep track of scene dragging
   this.lastX = 0;
   this.lastY = 0;
@@ -101,14 +106,12 @@ KinematicAnalysisApp.MAX_CAMERA_Z = 12;
 // A fixed grid floor
 //
 
-Floor = function ()
-{
+Floor = function () {
   return Sim.Object.call(this);
 }
 Floor.prototype = new Sim.Object();
 
-Floor.prototype.init = function (params)
-{
+Floor.prototype.init = function (params) {
   this.setObject3D(new THREE.Object3D());
 
   var geometry = new THREE.PlaneGeometry(10, 10, 10, 10)
@@ -123,3 +126,74 @@ Floor.prototype.init = function (params)
 
   this.object3D.add(floor);
 }
+
+
+//
+// A fixed table at the center on the floor
+//
+
+Table = function () {
+  return Sim.Object.call(this);
+}
+Table.prototype = new Sim.Object();
+
+Table.prototype.init = function (params) {
+ var group = new THREE.Object3D
+    , geometry = new THREE.CubeGeometry(2, 2, 1, 32, 32, 32)
+    , material = new THREE.MeshPhongMaterial({ color: 0x101510 , wireframe: false})
+    , table = new THREE.Mesh(geometry, material);
+  group.add(table);
+
+  group.position.z = .5;
+
+  // Add the poses
+
+  this.setObject3D(group);
+}
+
+TABLE.POSES = [{
+  id: 0,
+  reachable: 0,
+  position: {x: -0.5, y: -0.5, z: 1},
+  orientation: {x: 0, y: 0, z: 0, w: 0}
+}, {
+  id: 1,
+  reachable: 0,
+  position: {x: 0, y: -0.5, z: 1},
+  orientation: {x: 0, y: 0, z: 0, w: 0},
+}, {
+  id: 2,
+  reachable: 0,
+  position: {x: 0.5, y: -0.5, z: 1},
+  orientation: {x: 0, y: 0, z: 0, w: 0},
+}, {
+  id: 3,
+  reachable: 0,
+  position: {x: -0.5, y: 0, z: 1},
+  orientation: {x: 0, y: 0, z: 0, w: 0},
+}, {
+  id: 4,
+  reachable: 0,
+  position: {x: 0, y: 0, z: 1},
+  orientation: {x: 0, y: 0, z: 0, w: 0},
+}, {
+  id: 5,
+  reachable: 0,
+  position: {x: 0.5, y: 0, z: 1},
+  orientation: {x: 0, y: 0, z: 0, w: 0},
+}, {
+  id: 6,
+  reachable: 0,
+  position: {x: -0.5, y: 0.5, z: 1},
+  orientation: {x: 0, y: 0, z: 0, w: 0},
+}, {
+  id: 7,
+  reachable: 0,
+  position: {x: 0, y: 0.5, z: 1},
+  orientation: {x: 0, y: 0, z: 0, w: 0},
+}, {
+  id: 8,
+  reachable: 0,
+  position: {x: 0.5, y: 0.5, z: 1},
+  orientation: {x: 0, y: 0, z: 0, w: 0},
+}];
