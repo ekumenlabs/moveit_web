@@ -32,6 +32,9 @@
           <!-- Simplest robot selection -->
           <button class="btn" data-target="#test-modal" data-toggle="modal">Select Robot</button>
 
+
+          <!-- Simplest robot selection -->
+          <button id="go" class="btn">GO!</button>
         </div>
 
         <div id="scene" class="span9"></div>
@@ -80,9 +83,13 @@
 	  var app = null;
 
 	  $(document).ready(function() {
-	      app = new KinematicAnalysisApp();
-	      app.init({ container: document.getElementById('scene') });
-	      app.run();
+	    app = new KinematicAnalysisApp();
+	    app.init({ container: document.getElementById('scene'), debug: true });
+	    app.run();
+      });
+
+      $('#go').on('click', function () {
+        app.moveit.go();
       });
 	</script>
   </body>

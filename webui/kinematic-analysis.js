@@ -29,12 +29,22 @@ KinematicAnalysisApp.prototype.init = function (params) {
   table.init();
   this.addObject(table);
 
-  TABLE = table // DEBUG
-
   // Keep track of scene dragging
   this.lastX = 0;
   this.lastY = 0;
   this.mouseDown = false;
+
+  // Initialize a proxy to the MoveIt! backend
+  this.moveit = new MoveitBackend({
+    url: '',
+
+    debug: params.debug || false,
+
+    update: function (poses) {
+      // Update the pose set in the table
+      table.updatePoses(poses)
+    }
+  });
 }
 
 
@@ -160,6 +170,14 @@ Table.prototype.init = function (params) {
   this.addChild(poses);
 }
 
+Table.prototype.updatePoses = function (poses) {
+  // Delegate to its pose set
+  var set = this.children[0]
+  set.updatePoses.call(set, poses);
+}
+
+
+// Pose fixture
 Table.POSES = [{
   id: 0,
   reachable: 0,
@@ -243,9 +261,7 @@ PoseGroup.prototype.updatePoses = function (newPoses) {
       , point = this.poses[newPose.id];
 
     if (point.reachable !== newPose.reachable) {
-      console.log('Updating pose ID=' + newPose.id);
-
-      // Lose the old point
+      // Loose the old point
       point.destroy();
 
       // Create a new point with the new data
@@ -256,14 +272,6 @@ PoseGroup.prototype.updatePoses = function (newPoses) {
       this.poses[newPose.id] = point;
     }
   }
-}
-
-// TEST the pose coloring.
-var testUpdatePoses = function () {
-  var pose = Table.POSES[4]
-  pose.reachable = 1;
-
-  TABLE.children[0].updatePoses([pose]);
 }
 
 
@@ -305,4 +313,82 @@ PosePoint.prototype.init = function (params) {
 
 PosePoint.prototype.destroy = function () {
   this.root.remove(this.mesh);
+}
+
+
+//
+// MoveIt! backend proxy
+//
+
+MoveitBackend = function (params) {
+
+  // Delegate networking calls to the network manager object
+  if (params.debug)
+    this.network = new NetworkManagerMock(params);
+  else
+    this.network = new NetworkManager(params);
+
+  // Where to callback to, when the new poses are ready
+  this.updateCallback = params.update;
+}
+
+MoveitBackend.prototype = {}
+
+MoveitBackend.prototype.go = function () {
+  var that = this;
+
+  // The backend knows what to do
+  this.network.go(function () {
+    // Get the new poses when the "go" call is done
+    that.network.getAllPoses(function (poses) {
+      // Callback to application code to update the poses
+      that.updateCallback(poses);
+    });
+  });
+}
+
+
+//
+// Network-solutions object
+//
+
+NetworkManagerMock = function (params) { }
+
+NetworkManagerMock.prototype = {}
+
+NetworkManagerMock.prototype.go = function (fn) {
+  console.log('GO!');
+  fn();
+}
+
+NetworkManagerMock.prototype.getAllPoses = function (fn) {
+  // New random reachable state
+  for (var i = 0; i < Table.POSES.length; i++) {
+    var n = parseInt(Math.random() * 10) % 3;
+    Table.POSES[i].reachable = n;
+  }
+  fn(Table.POSES);
+}
+
+//
+//
+//
+
+NetworkManager = function (params) {
+  this.url = params.url;
+}
+
+NetworkManager.prototype = {}
+
+NetworkManager.prototype.go = function (fn) { }
+
+NetworkManager.prototype.getAllPoses = function (fn) { }
+
+NetworkManager.prototype.formatPose = function (remotePose) {
+  var pose = {};
+  pose.id = remotePose.id;
+  pose.reachable = remotePose.reachable;
+  pose.position = remotePose.pose.position;
+  pose.orientation = remotePose.pose.orientation;
+  return pose;
 }
