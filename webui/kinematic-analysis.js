@@ -29,8 +29,6 @@ KinematicAnalysisApp.prototype.init = function (params) {
   table.init();
   this.addObject(table);
 
-  TABLE = table // DEBUG
-
   // Keep track of scene dragging
   this.lastX = 0;
   this.lastY = 0;
@@ -40,9 +38,8 @@ KinematicAnalysisApp.prototype.init = function (params) {
   this.moveit = new MoveitBackend({
     url: '',
 
-    // UGLY UGLY UGLY
     update: function (poses) {
-      table.children[0].updatePoses(poses)
+      table.updatePoses(poses)
     }
   });
 }
@@ -170,6 +167,14 @@ Table.prototype.init = function (params) {
   this.addChild(poses);
 }
 
+Table.prototype.updatePoses = function (poses) {
+  // Delegate to its pose set
+  var set = this.children[0]
+  set.updatePoses.call(set, poses);
+}
+
+
+// Pose fixture
 Table.POSES = [{
   id: 0,
   reachable: 0,
@@ -264,14 +269,6 @@ PoseGroup.prototype.updatePoses = function (newPoses) {
       this.poses[newPose.id] = point;
     }
   }
-}
-
-// TEST the pose coloring.
-var testUpdatePoses = function () {
-  var pose = Table.POSES[4]
-  pose.reachable = 1;
-
-  TABLE.children[0].updatePoses([pose]);
 }
 
 
@@ -387,10 +384,9 @@ NetworkManager.prototype.getAllPoses = function (fn) {
 }
 
 NetworkManager.prototype.formatPose = function (remotePose) {
-  var pose = {};
-
   // Real implementation:
   //
+  // var pose = {};
   // pose.id = remotePose.id;
   // pose.reachable = remotePose.reachable;
   // pose.position = remotePose.pose.position;
