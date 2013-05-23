@@ -38,7 +38,10 @@ KinematicAnalysisApp.prototype.init = function (params) {
   this.moveit = new MoveitBackend({
     url: '',
 
+    debug: params.debug || false,
+
     update: function (poses) {
+      // Update the pose set in the table
       table.updatePoses(poses)
     }
   });
@@ -318,12 +321,17 @@ PosePoint.prototype.destroy = function () {
 //
 
 MoveitBackend = function (params) {
+
   // Delegate networking calls to the network manager object
-  this.network = new NetworkManager(params);
+  if (params.debug)
+    this.network = new NetworkManagerMock(params);
+  else
+    this.network = new NetworkManager(params);
 
   // Where to callback to, when the new poses are ready
   this.updateCallback = params.update;
 }
+
 MoveitBackend.prototype = {}
 
 MoveitBackend.prototype.go = function () {
@@ -344,54 +352,43 @@ MoveitBackend.prototype.go = function () {
 // Network-solutions object
 //
 
-NetworkManager = function (params) {
-  this.endpoint = params.url;
-}
-NetworkManager.prototype = {}
+NetworkManagerMock = function (params) { }
 
-NetworkManager.prototype.go = function (fn) {
-  // Stub implementation
+NetworkManagerMock.prototype = {}
 
-  // Implement AJAX request to the backend to trigger recomputation
-  //
-  // on complete --> fn()
-
+NetworkManagerMock.prototype.go = function (fn) {
   console.log('GO!');
-
   fn();
 }
 
-NetworkManager.prototype.getAllPoses = function (fn) {
-  // Stub implementation
-
-  // Implement the AJAX request to bring the new poses
-  //
-  // on complete --> fn(newPoses)
+NetworkManagerMock.prototype.getAllPoses = function (fn) {
+  // New random reachable state
   for (var i = 0; i < Table.POSES.length; i++) {
-    // New random reachable state
     var n = parseInt(Math.random() * 10) % 3;
     Table.POSES[i].reachable = n;
   }
-  var newPoses = Table.POSES
-    , poses = [];
-
-  // Re-format the returned poses
-  for (var i = 0; i < newPoses.length; i++) {
-    poses[i] = this.formatPose(newPoses[i]);
-  }
-
-  fn(poses);
+  fn(Table.POSES);
 }
 
-NetworkManager.prototype.formatPose = function (remotePose) {
-  // Real implementation:
-  //
-  // var pose = {};
-  // pose.id = remotePose.id;
-  // pose.reachable = remotePose.reachable;
-  // pose.position = remotePose.pose.position;
-  // pose.orientation = remotePose.pose.orientation;
+//
+//
+//
 
-  // Mock (pass through) implementation
-  return remotePose;
+NetworkManager = function (params) {
+  this.url = params.url;
+}
+
+NetworkManager.prototype = {}
+
+NetworkManager.prototype.go = function (fn) { }
+
+NetworkManager.prototype.getAllPoses = function (fn) { }
+
+NetworkManager.prototype.formatPose = function (remotePose) {
+  var pose = {};
+  pose.id = remotePose.id;
+  pose.reachable = remotePose.reachable;
+  pose.position = remotePose.pose.position;
+  pose.orientation = remotePose.pose.orientation;
+  return pose;
 }
