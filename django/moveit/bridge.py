@@ -2,13 +2,25 @@ import rospy
 from moveit_commander import MoveGroupCommander, PlanningSceneInterface
 from geometry_msgs.msg import Pose, PoseStamped
 from moveit_msgs.msg import PlanningSceneWorld, CollisionObject
+from sensor_msgs.msg import JointState
 from rospy_message_converter import message_converter
 
 class Planner(object):
     move_group = None
-    goals = []
+    goals = None
+    jspub = None
     def __init__(self):
         rospy.init_node('moveit_web',disable_signals=True)
+        self.jspub = rospy.Publisher('/update_joint_states',JointState)
+        # Give time for subscribers to connect to the publisher
+        rospy.sleep(1)
+        self.goals = []
+
+        # HACK: Synthesize a valid initial joint configuration for PR2
+        initial_joint_state = JointState()
+        initial_joint_state.name = ['r_elbow_flex_joint']
+        initial_joint_state.position = [-0.1]
+        self.jspub.publish(initial_joint_state)
 
     def calculate_goals(self):
         # Load the goals from wherever
@@ -59,10 +71,17 @@ class Planner(object):
         trajectory = self.move_group.plan()
 
         print trajectory
-        if trajectory is None:
-            return 0
+        if trajectory is None or len(trajectory.joint_trajectory.joint_names) == 0:
+            return False
         else:
-            return 1
+            # Also publish the end position
+            jsmsg = JointState()
+            jsmsg.name = trajectory.joint_trajectory.joint_names
+            jsmsg.position = trajectory.joint_trajectory.points[-1].positions
+
+            self.jspub.publish(jsmsg)
+
+            return True
 
 _planner = None
 def get_planner():

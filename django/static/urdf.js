@@ -16,13 +16,23 @@ $(function(){
     var urdfModel = new ROSLIB.UrdfModel({
       string: urdf_string
     });
+    var ros = new ROSLIB.Ros({
+      url: 'ws://localhost:9090'
+    });
+    var tfClient = new ROSLIB.TFClient({
+      ros: ros,
+      angularThres: 0.01,
+      transThres: 0.01,
+      rate: 10.0
+    });
     var theURDF = new ROS3D.Urdf({
       urdfModel: urdfModel,
-      // path: '/static/',
       path: 'http://resources.robotwebtools.org/',
+      tfClient: tfClient
+      /* path: '/static/',
       tfClient: {
         subscribe: function() {}
-      }
+      } */
     });
     viewer.addObject(theURDF);
     console.log("done");
