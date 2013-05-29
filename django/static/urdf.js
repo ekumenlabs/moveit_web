@@ -11,6 +11,10 @@ $(function(){
   // Add grid
   viewer.addObject(new ROS3D.Grid());
 
+  $('#run').on('click',function(ev){
+    $.post('/run');
+  });
+
   $.get('/static/pr2_description/pr2.urdf',function(urdf_string){
     // Create URDF object
     var urdfModel = new ROSLIB.UrdfModel({
