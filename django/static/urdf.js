@@ -17,7 +17,7 @@ $(function(){
       string: urdf_string
     });
     var ros = new ROSLIB.Ros({
-      url: 'ws://localhost:9090'
+      url: 'ws://'+window.document.domain+':9090'
     });
     var tfClient = new ROSLIB.TFClient({
       ros: ros,
