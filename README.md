@@ -4,6 +4,27 @@ moveit_web
 Web-based tools using the MoveIt planning framework
 
 
+Demo
+----
+
+### Installation
+
+TBD
+
+### Running
+
+Start the MoveIt! backend and all dependencies:
+
+    roslaunch moveit_web everything.launch
+
+Start the django server
+
+    cd src/moveit_web/django
+    ./run.sh
+
+Open a browser and point to the URDF viewer at
+http://localhost:8080/static/urdf.html
+
 Web-UI
 ------
 

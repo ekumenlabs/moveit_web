@@ -66,11 +66,15 @@ class Planner(object):
         - 0: not reachable
         - 1: reachable
         """
+
+        print "Starting to plan"
         self.move_group = MoveGroupCommander('right_arm_and_torso')
         self.move_group.set_pose_target(pose)
         trajectory = self.move_group.plan()
+        print "Plan finished. Steps=%d, plan duration=%f" % (
+                len(trajectory.joint_trajectory.points),
+                trajectory.joint_trajectory.points[-1].time_from_start)
 
-        print trajectory
         if trajectory is None or len(trajectory.joint_trajectory.joint_names) == 0:
             return False
         else:
