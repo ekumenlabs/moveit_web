@@ -32,6 +32,9 @@ urlpatterns = patterns('',
     url(r'^goals$', 'moveit.views.goals'),
     url(r'^run$', 'moveit.views.run'),
 
+    # Main entry point: redirect to app
+    url(r'^$', RedirectView.as_view(url='/static/urdf.html')),
+
     # Connect to socketio namespace
     #url(r'^socket\.io', socketio_hookup),
 )
