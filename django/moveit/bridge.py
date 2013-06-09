@@ -5,6 +5,7 @@ from moveit_msgs.msg import PlanningSceneWorld, CollisionObject
 from sensor_msgs.msg import JointState
 from rospy_message_converter import message_converter
 import json
+import gevent
 
 class Planner(object):
     move_group = None
@@ -47,29 +48,28 @@ class Planner(object):
         trajectory = self.move_group.plan()
         if trajectory is None or len(trajectory.joint_trajectory.joint_names) == 0:
             self.emit('status',{'reachable':False})
-            print "not reachable"
         else:
-            self.emit('status',{'reachable':True})
-            self.publish_goal_position(trajectory)
+            self.emit('status',{'reachable':True,'text':'Rendering trajectory'})
+            self.publish_trajectory(trajectory)
 
     def publish_goal_position(self, trajectory):
+        self.publish_position(self, trajectory, -1)
+
+    def publish_position(self, trajectory, step):
         jsmsg = JointState()
         jsmsg.name = trajectory.joint_trajectory.joint_names
-        jsmsg.position = trajectory.joint_trajectory.points[-1].positions
+        jsmsg.position = trajectory.joint_trajectory.points[step].positions
         self.jspub.publish(jsmsg)
 
-    def load_goals(self):
-        p = Pose()
-        p.position.x = 0.7
-        p.position.y = -0.188
-        p.position.z = 1.25001048644
-        p.orientation.x = -0.0
-        p.orientation.y = -0.887929895957
-        p.orientation.z = -0.0
-        p.orientation.w = 0.459978803714
-        self.goals = [{'pose': p, 'reachable': 0, 'id': 0}]
-        print "Message: %s" % message_converter.convert_ros_message_to_dictionary(p)
-        self.emit('target_pose',message_converter.convert_ros_message_to_dictionary(p)['position'])
+    def publish_trajectory(self, trajectory):
+        cur_time = 0.0
+        acceleration = 4.0
+        for i in range(len(trajectory.joint_trajectory.points)):
+            point = trajectory.joint_trajectory.points[i]
+            gevent.sleep((point.time_from_start - cur_time)/acceleration)
+            cur_time = point.time_from_start
+            self.publish_position(trajectory, i)
+        self.emit('status',{'text':'Ready to plan','ready':True})
 
 _planner = None
 def get_planner():

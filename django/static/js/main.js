@@ -53,8 +53,9 @@ $(function(){
        $('#status-message').html(statusMessage['text']);
     }
     if('reachable' in statusMessage) {
-      console.log(statusMessage['reachable']?'reachable!':'not reachable :-(');
       lastGoal.material = statusMessage['reachable']?reachableColor:unreachableColor;
+    }
+    if('ready' in statusMessage && statusMessage['ready']) {
       $('#run').removeAttr('disabled');
       $('#run').html('Random goal');
     }
