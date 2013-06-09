@@ -5,13 +5,13 @@ from django.http import HttpResponse
 # Adding a new Socket.IO Namespace:
 # 1- Import the namespace Class here (where the code actually is)
 # 2- Add it to the second parameter to socketio_manage below
-#from lime.socket import LimeNamespace
+from moveit.socket import PlanNamespace
 
-#from socketio import socketio_manage
+from socketio import socketio_manage
 
-#def socketio_hookup(request):
-    #socketio_manage(request.environ, {LimeNamespace.name: LimeNamespace}, request)
-    #return HttpResponse("Socket connection ended")
+def socketio_hookup(request):
+    socketio_manage(request.environ, {PlanNamespace.name: PlanNamespace}, request)
+    return HttpResponse("Socket connection ended")
 
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
@@ -32,6 +32,9 @@ urlpatterns = patterns('',
     url(r'^goals$', 'moveit.views.goals'),
     url(r'^run$', 'moveit.views.run'),
 
+    # Main entry point: redirect to app
+    url(r'^$', RedirectView.as_view(url='/static/index.html')),
+
     # Connect to socketio namespace
-    #url(r'^socket\.io', socketio_hookup),
+    url(r'^socket\.io', socketio_hookup),
 )

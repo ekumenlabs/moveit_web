@@ -1,0 +1,185 @@
+@charset "UTF-8";
+/* CSS Document */
+
+/* SuperStretch! - Experimental Fluid Layout Stylesheet - v.0.0.5 */
+/* 2010 MightyMeta www.mightymeta.co.uk */
+/* Licensed under the MIT License: http://www.opensource.org/licenses/mit-license.php */
+
+/* Browser Resets */
+
+ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, body, html, p, blockquote, fieldset, input
+{ margin:0; padding:0 }
+h1, h2, h3, h4, h5, h6, pre, code { font-size:100%; }
+html, body { height: 100%; overflow: hidden; }
+
+/* Main HTML element styles */
+
+body {
+	font-family: Arial, Helvetica, sans-serif;
+	line-height: 140%;
+	color: #fff;
+	background: #301849 url(../images/gradient.png) repeat-x;
+}
+
+h1 {
+	font-size:3em;
+	padding:0 20px 0 0;
+	line-height:160%;
+	text-align:right;
+	text-shadow:#000 2px 2px;
+}
+
+p {
+	font-size: 1em;
+	padding-bottom: 1em;
+	padding-top: 0.8em;
+}
+
+a {
+	color: #fff;
+	text-decoration: underline;
+	font-weight: bold;
+}
+
+a:hover {
+	text-decoration: none;
+}
+
+/* Wrapper Styles */
+
+#wrapper1 {
+	position: relative;
+	top: 20px;
+	left: 20px;	
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+}
+#wrapper2 {
+	position: absolute;
+	top: 0px;	
+	right: 40px;	
+	bottom: 60px;
+	left: 0px;
+	overflow: hidden;
+	border: 2px solid #fff;
+}
+
+/* Navigation */
+
+#nav {
+	height: 100%;
+	width: 100px;
+	border-right: 2px solid #fff;
+	overflow: hidden;
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	list-style-type: none;
+}
+#nav  a {
+	font-size: 0.9em;
+	font-weight: bold;
+	text-transform: uppercase;
+	text-decoration: none;
+	text-shadow:#000 1px 1px;
+	display: block;
+	position:absolute;
+	overflow: hidden;
+	width: 86px;
+	padding-right: 10px;
+	padding-left: 4px;
+	background: url(../images/nav-bg.png) repeat;
+}
+#nav  a:hover {
+	background-image: none;
+	background-color: #ffcc66;
+}
+#nav  #nav-select {
+	background-image: none;
+	background-color: #ff9900;
+}
+.nav1 {
+	height: 18%;
+	top: 0%;
+}
+.nav2 {
+	height: 7%;
+	top: 18%;
+	border-top: solid 2px #fff;
+}
+.nav3 {
+	height: 8%;
+	top: 25%;
+	border-top: solid 2px #fff;
+}
+.nav4 {
+	height: 35%;
+	top: 33%;
+	border-top: solid 2px #fff;
+}
+.nav5 {
+	height: 10%;
+	border-top: solid 2px #fff;
+	top: 68%;
+}
+.nav6 {
+	height: 6%;
+	top: 78%;
+	border-top: solid 2px #fff;
+}
+.nav7 {
+	height: 16%;
+	top: 84%;
+	border-top: solid 2px #fff;
+	border-bottom: solid 2px #fff;
+}
+
+
+/* Content Area */
+
+#content-box {
+	position: absolute;
+	height: auto;
+	width: auto;
+	top: 0px;
+	left: 102px;
+	bottom: 0px;
+	right: 0px;
+}
+#content-top {
+	position: absolute;
+	top: 0px;
+	right: 0px;
+}
+#content-bottom {
+	position: absolute;
+	width: 100%;
+	height: 67%;
+	top: 33%;
+	bottom: 0px;
+	overflow: auto;
+	border-top: 2px solid #fff;
+	background: url(../images/main-bg.png) repeat;
+}
+#content-bottom   p {
+	padding: 15px 20px 0 20px;
+}
+
+
+/* Footer Info */
+
+#copyright {
+	position: absolute;
+	font-size: 0.9em;
+	text-shadow:#000 1px 1px;
+	right: 40px;
+	bottom: 35px;
+}
+#copyright a {
+	text-decoration: underline;
+	font-weight: normal;
+}
+#copyright a:hover {
+	text-decoration: none;
+}
