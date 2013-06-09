@@ -4,8 +4,9 @@ $(function(){
   // Create viewer
   var viewer = new ROS3D.Viewer({
     divID : 'canvas',
-    width : window.innerWidth,
-    height : window.innerHeight,
+    width : $('#canvas').width(),
+    height : 360,
+    //height : window.innerHeight - 140,
     antialias : true
   });
   // Add grid
