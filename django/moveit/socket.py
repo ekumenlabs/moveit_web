@@ -11,7 +11,9 @@ class PlanNamespace(BaseNamespace):
     planner = None
     def on_connected(self, *args):
         logger.debug('user %s connected' % self.request.user)
-        planner = get_planner()
-        planner.set_socket(self)
-        self.emit('status','ready to go')
+        self.planner = get_planner()
+        self.planner.set_socket(self)
+        self.emit('status',{'text':'ready to go'})
 
+    def on_plan_random(self, *args):
+        self.planner.plan_to_random_goal()

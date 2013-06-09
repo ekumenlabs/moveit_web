@@ -41,27 +41,44 @@ $(function(){
 
   // Hook run button to start demo
   $('#run').on('click',function(ev){
-    $.post('/run');
+    plan.emit('plan_random');
+    $('#run').attr('disabled','disabled');
+    $('#run').html('working ...');
   });
 
   // Socket.io events
   var plan = io.connect('/plan');
   plan.on('status',function(statusMessage){
-    $('#status-message').html(statusMessage);
+    if('text' in statusMessage) {
+       $('#status-message').html(statusMessage['text']);
+    }
+    if('reachable' in statusMessage) {
+      console.log(statusMessage['reachable']?'reachable!':'not reachable :-(');
+      lastGoal.material = statusMessage['reachable']?reachableColor:unreachableColor;
+      $('#run').removeAttr('disabled');
+      $('#run').html('Random goal');
+    }
   });
   plan.on('target_pose',function(position){
     console.log('Will plan to position: ', position);
     addGoal( position)
   });
-  plan.emit('connected');
+  plan.on('connect',function() {
+    plan.emit('connected');
+  });
 
+  var unknownColor = new THREE.MeshBasicMaterial( { color: 0xffffff } );
+  var reachableColor = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+  var unreachableColor = new THREE.MeshBasicMaterial( { color: 0xff0000 } );
 
+  var goals = [];
+  var lastGoal;
   function addGoal(position) {
     var geometry = new THREE.SphereGeometry(0.03,0.03,0.03);
-    var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-    var cube = new THREE.Mesh( geometry, material );
-    cube.position.set(position.x, position.y, position.z);
-    viewer.scene.add( cube );
-    console.log('Goal added');
+    var material = unknownColor;
+    lastGoal = new THREE.Mesh( geometry, material );
+    lastGoal.position.set(position.x, position.y, position.z);
+    viewer.scene.add(lastGoal);
+    goals.push(lastGoal);
   }
 });

@@ -11,6 +11,7 @@ class Planner(object):
     goals = None
     jspub = None
     namespace = None
+
     def __init__(self):
         rospy.init_node('moveit_web',disable_signals=True)
         self.jspub = rospy.Publisher('/update_joint_states',JointState)
@@ -24,6 +25,9 @@ class Planner(object):
         initial_joint_state.position = [-0.1]
         self.jspub.publish(initial_joint_state)
 
+        # Create group we'll use all along this demo
+        self.move_group = MoveGroupCommander('right_arm_and_torso')
+
     # Create link back to socket.io namespace to allow emitting information
     def set_socket(self, namespace):
         self.namespace = namespace
@@ -32,31 +36,27 @@ class Planner(object):
         if self.namespace:
             self.namespace.emit(event, data)
 
-    def calculate_goals(self):
-        # Load the goals from wherever
-        self.load_goals()
+    def emit_new_goal(self, pose):
+        self.emit('target_pose', message_converter.convert_ros_message_to_dictionary(pose)['pose']['position'])
 
-        # Set the World (cube)
-        self.load_scene()
+    def plan_to_random_goal(self):
+        goal_pose = self.move_group.get_random_pose()
+        self.emit_new_goal(goal_pose)
+        self.move_group.set_pose_target(goal_pose)
+        self.emit('status',{'text':'Starting to plan'})
+        trajectory = self.move_group.plan()
+        if trajectory is None or len(trajectory.joint_trajectory.joint_names) == 0:
+            self.emit('status',{'reachable':False})
+            print "not reachable"
+        else:
+            self.emit('status',{'reachable':True})
+            self.publish_goal_position(trajectory)
 
-        # Set the robot position
-        # ????
-
-        # Calculate reachability
-        for goal in self.goals:
-            goal['reachable'] = self.is_reachable(goal['pose'])
-
-    def get_goals_as_json(self):
-        ret = []
-        for goal in self.goals:
-            newgoal = goal.copy()
-            newgoal['pose'] = message_converter.convert_ros_message_to_dictionary(newgoal['pose'])
-            ret.append(newgoal)
-        return ret
-
-    def load_scene(self):
-        # TODO
-        pass
+    def publish_goal_position(self, trajectory):
+        jsmsg = JointState()
+        jsmsg.name = trajectory.joint_trajectory.joint_names
+        jsmsg.position = trajectory.joint_trajectory.points[-1].positions
+        self.jspub.publish(jsmsg)
 
     def load_goals(self):
         p = Pose()
@@ -68,51 +68,8 @@ class Planner(object):
         p.orientation.z = -0.0
         p.orientation.w = 0.459978803714
         self.goals = [{'pose': p, 'reachable': 0, 'id': 0}]
-        self.emit('target_pose',self._pose_to_dict(p)['position'])
-
-    def _pose_to_dict(self, pose):
-        ret = {
-            'position': {
-                'x': pose.position.x,
-                'y': pose.position.y,
-                'z': pose.position.z
-            },
-            'orientation': {
-                'x': pose.orientation.x,
-                'y': pose.orientation.y,
-                'z': pose.orientation.z,
-                'w': pose.orientation.w
-            }
-        }
-        return ret
-
-    def is_reachable(self, pose):
-        """
-        Calculates reachability to a given pose
-        Returns an integer state:
-        - 0: not reachable
-        - 1: reachable
-        """
-
-        print "Starting to plan"
-        self.move_group = MoveGroupCommander('right_arm_and_torso')
-        self.move_group.set_pose_target(pose)
-        trajectory = self.move_group.plan()
-        print "Plan finished. Steps=%d, plan duration=%f" % (
-                len(trajectory.joint_trajectory.points),
-                trajectory.joint_trajectory.points[-1].time_from_start)
-
-        if trajectory is None or len(trajectory.joint_trajectory.joint_names) == 0:
-            return False
-        else:
-            # Also publish the end position
-            jsmsg = JointState()
-            jsmsg.name = trajectory.joint_trajectory.joint_names
-            jsmsg.position = trajectory.joint_trajectory.points[-1].positions
-
-            self.jspub.publish(jsmsg)
-
-            return True
+        print "Message: %s" % message_converter.convert_ros_message_to_dictionary(p)
+        self.emit('target_pose',message_converter.convert_ros_message_to_dictionary(p)['position'])
 
 _planner = None
 def get_planner():
