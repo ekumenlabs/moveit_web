@@ -45,6 +45,11 @@ $(function(){
     $('#run').attr('disabled','disabled');
     $('#run').html('working ...');
   });
+  $('#clear').on('click',function(ev){
+    goals.forEach(function(goal){
+      viewer.scene.remove(goal);
+    });
+  });
 
   // Socket.io events
   var plan = io.connect('/plan');
