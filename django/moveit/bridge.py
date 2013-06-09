@@ -4,11 +4,13 @@ from geometry_msgs.msg import Pose, PoseStamped
 from moveit_msgs.msg import PlanningSceneWorld, CollisionObject
 from sensor_msgs.msg import JointState
 from rospy_message_converter import message_converter
+import json
 
 class Planner(object):
     move_group = None
     goals = None
     jspub = None
+    namespace = None
     def __init__(self):
         rospy.init_node('moveit_web',disable_signals=True)
         self.jspub = rospy.Publisher('/update_joint_states',JointState)
@@ -21,6 +23,14 @@ class Planner(object):
         initial_joint_state.name = ['r_elbow_flex_joint']
         initial_joint_state.position = [-0.1]
         self.jspub.publish(initial_joint_state)
+
+    # Create link back to socket.io namespace to allow emitting information
+    def set_socket(self, namespace):
+        self.namespace = namespace
+
+    def emit(self, event, data=None):
+        if self.namespace:
+            self.namespace.emit(event, data)
 
     def calculate_goals(self):
         # Load the goals from wherever
@@ -58,6 +68,23 @@ class Planner(object):
         p.orientation.z = -0.0
         p.orientation.w = 0.459978803714
         self.goals = [{'pose': p, 'reachable': 0, 'id': 0}]
+        self.emit('target_pose',self._pose_to_dict(p)['position'])
+
+    def _pose_to_dict(self, pose):
+        ret = {
+            'position': {
+                'x': pose.position.x,
+                'y': pose.position.y,
+                'z': pose.position.z
+            },
+            'orientation': {
+                'x': pose.orientation.x,
+                'y': pose.orientation.y,
+                'z': pose.orientation.z,
+                'w': pose.orientation.w
+            }
+        }
+        return ret
 
     def is_reachable(self, pose):
         """
