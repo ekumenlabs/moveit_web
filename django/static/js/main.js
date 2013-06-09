@@ -55,6 +55,7 @@ $(function(){
   var plan = io.connect('/plan');
   plan.on('status',function(statusMessage){
     if('text' in statusMessage) {
+       $('#previous-status-message').html($('#status-message').html());
        $('#status-message').html(statusMessage['text']);
     }
     if('reachable' in statusMessage) {

@@ -47,7 +47,7 @@ class Planner(object):
         self.emit('status',{'text':'Starting to plan'})
         trajectory = self.move_group.plan()
         if trajectory is None or len(trajectory.joint_trajectory.joint_names) == 0:
-            self.emit('status',{'reachable':False,'ready':True})
+            self.emit('status',{'reachable':False,'text':'Ready to plan','ready':True})
         else:
             self.emit('status',{'reachable':True,'text':'Rendering trajectory'})
             self.publish_trajectory(trajectory)
