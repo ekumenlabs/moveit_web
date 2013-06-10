@@ -1,0 +1,29 @@
+<launch>
+  <!-- Load robot description in parameter server -->
+  <include file="$(find pr2_moveit_config)/launch/planning_context.launch">
+    <arg name="load_robot_description" value="true"/>
+  </include>
+
+  <!-- Robot and Joint state publisher -->
+  <rosparam param="/source_list">[/update_joint_states]</rosparam>
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+    <param name="/use_gui" value="false"/>
+  </node>
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="true" output="screen" />
+
+  <!-- Moveit node -->
+  <include file="$(find pr2_moveit_config)/launch/move_group.launch">
+    <arg name="allow_trajectory_execution" value="false"/>
+  </include>
+
+  <!-- ROS3DJS stuff -->
+  <node name="tf2_web_republisher" pkg="tf2_web_republisher" type="tf2_web_republisher" />
+  <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch" />
+
+  <!-- RViz and the warehouse (DISABLED)
+  <include file="$(find pr2_moveit_config)/launch/moveit_rviz.launch">
+    <arg name="config" value="true"/>
+  </include>
+  <include file="$(find pr2_moveit_config)/launch/default_warehouse_db.launch" />
+  -->
+</launch>

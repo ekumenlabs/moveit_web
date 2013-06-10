@@ -1,11 +1,14 @@
 # Create your views here.
 from django.http import HttpResponse
 import json
+from bridge import get_planner
 
 def run(request):
-    data = json.dumps({})
+    #get_planner().calculate_goals()
+    data = json.dumps({'rc':'ok'})
     return HttpResponse(data, mimetype='application/json')
 
 def goals(request):
-    data = json.dumps({})
+    #data = json.dumps(get_planner().get_goals_as_json())
+    data = {}
     return HttpResponse(data, mimetype='application/json')
