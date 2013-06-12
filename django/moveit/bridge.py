@@ -29,6 +29,9 @@ class Planner(object):
         # Create group we'll use all along this demo
         self.move_group = MoveGroupCommander('right_arm_and_torso')
 
+    def get_link_poses(self):
+        return self.move_group._g.get_link_poses_compressed()
+
     # Create link back to socket.io namespace to allow emitting information
     def set_socket(self, namespace):
         self.namespace = namespace
@@ -69,6 +72,7 @@ class Planner(object):
             gevent.sleep((point.time_from_start - cur_time)/acceleration)
             cur_time = point.time_from_start
             self.publish_position(trajectory, i)
+            self.emit('link_poses', self.get_link_poses())
         self.emit('status',{'text':'Ready to plan','ready':True})
 
 _planner = None

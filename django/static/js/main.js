@@ -1,3 +1,4 @@
+var model, urdf;
 $(function(){
   console.log("starting");
 
@@ -17,6 +18,8 @@ $(function(){
     var urdfModel = new ROSLIB.UrdfModel({
       string: urdf_string
     });
+    model = urdfModel;
+    /*
     var ros = new ROSLIB.Ros({
       url: 'ws://'+window.document.domain+':9090'
     });
@@ -25,16 +28,17 @@ $(function(){
       angularThres: 0.01,
       transThres: 0.01,
       rate: 10.0
-    });
+    }); */
     var theURDF = new ROS3D.Urdf({
       urdfModel: urdfModel,
       path: 'http://resources.robotwebtools.org/',
-      tfClient: tfClient
-      /* path: '/static/',
+      /* tfClient: tfClient
+      path: '/static/', */
       tfClient: {
         subscribe: function() {}
-      } */
+      } 
     });
+    urdf = theURDF;
     viewer.addObject(theURDF);
     console.log("done");
   });
@@ -64,11 +68,16 @@ $(function(){
     if('ready' in statusMessage && statusMessage['ready']) {
       $('#run').removeAttr('disabled');
       $('#run').html('Random goal');
+      plan.emit('get_link_poses');
     }
   });
   plan.on('target_pose',function(position){
     console.log('Will plan to position: ', position);
     addGoal( position)
+  });
+  plan.on('link_poses',function(poses){
+    console.log('Got poses: ', poses);
+    updatePoses( poses);
   });
   plan.on('connect',function() {
     plan.emit('connected');
@@ -87,5 +96,24 @@ $(function(){
     lastGoal.position.set(position.x, position.y, position.z);
     viewer.scene.add(lastGoal);
     goals.push(lastGoal);
+  }
+  function updatePoses(poses) {
+    var linkNameToChildIndexMap = {};
+    urdf.children.forEach(function(sceneNode){
+      linkNameToChildIndexMap[sceneNode.frameID] = sceneNode;
+    });
+    poses.global_link.forEach(function(poseAsList){
+      var linkName = poseAsList[0];
+      if('/'+linkName in linkNameToChildIndexMap) {
+        console.log('updating link: ' + linkName);
+        var sceneNode = linkNameToChildIndexMap['/'+linkName];
+        sceneNode.updatePose({
+          position: { x: poseAsList[1], y:  poseAsList[2], z:  poseAsList[3] },
+          orientation: { x: poseAsList[4], y: poseAsList[5], z: poseAsList[6], w: poseAsList[7] }
+        });
+      } else {
+        console.log('missed link: ' + linkName);
+      }
+    });
   }
 });
