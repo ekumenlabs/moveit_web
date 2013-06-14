@@ -1,9 +1,9 @@
-var model, urdf;
+var model, urdf, table, viewer;
 $(function(){
   console.log("starting");
 
   // Create viewer
-  var viewer = new ROS3D.Viewer({
+  viewer = new ROS3D.Viewer({
     divID : 'canvas',
     width : $('#canvas').width(),
     height : 360,
@@ -53,6 +53,9 @@ $(function(){
     goals.forEach(function(goal){
       viewer.scene.remove(goal);
     });
+  });
+  $('#scene').on('click',function(ev){
+    loadScene();
   });
 
   // Socket.io events
@@ -115,5 +118,54 @@ $(function(){
         console.log('missed link: ' + linkName);
       }
     });
+  }
+
+  function loadScene() {
+    // This would be a database object describing the scene
+    var sceneHardcoded = {
+      name: 'A Table',
+      objects: [{
+        id: 't1',
+        name: 'table',
+        meshUrl: '/static/meshes/table_4legs.dae',
+        pose: {
+          position: { x: 0.5, y: -1, z: 0 },
+          orientation: { x: 0, y: 0, z: 0, w: 0 }
+        }
+      },{
+        id: 't2',
+        name: 'table',
+        meshUrl: '/static/meshes/table_4legs.dae',
+        pose: {
+          position: { x: 0.5, y: -2.5, z: 0 },
+          orientation: { x: 0, y: 0, z: 0, w: 0 }
+        }
+      },{
+        id: 't3',
+        name: 'table',
+        meshUrl: '/static/meshes/table_4legs.dae',
+        pose: {
+          position: { x: 0.5, y: -2.5, z: 0 },
+          orientation: { x: 0, y: 0, z: 3.14159/2.0, w: 0 }
+        }
+      }]
+    };
+    // Load meshes and render them
+    sceneHardcoded.objects.forEach(function(object) {
+      var loader = new ColladaLoader2();
+      loader.load(object.meshUrl, function(dae){
+        var scene = dae.scene;
+        table = scene;
+        mixin(scene.position, object.pose.position);
+        mixin(scene.rotation, object.pose.orientation);
+        viewer.scene.add(scene);
+      });
+    });
+  }
+
+  function mixin(into, what) {
+    for(key in what) {
+      into[key] = what[key];
+    }
   }
 });

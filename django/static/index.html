@@ -44,21 +44,35 @@
         <div class="container-fluid">
           <div class="row-fluid">
             <div class="span3">
-              <div class="row-fluid">
-                <span>
+              <table class="table">
+                <tr>
+                  <td>
                  Robot: PR2
-                </span>
-              </div>
-              <div class="row-fluid">
-                <button id="run">Random goal</button>
-                <button id="clear">Clear goals</button>
-              </div>
-              <div class="row-fluid">
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                <button class="btn btn-small" id="run">Random goal</button>
+                <button class="btn btn-small" id="clear">Clear goals</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
                 Status: <span id="status-message"></span>
-              </div>
-              <div class="row-fluid">
+                  </td>
+                </tr>
+                <tr>
+                  <td>
                 Prevoius status: <span id="previous-status-message"></span>
-              </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                <button class="btn btn-small" id="scene">Load scene</button>
+                Scene: <span id="scene-name"></span>
+                  </td>
+                </tr>
+              </table>
             </div>
             <div class="span9">
               <div id="canvas"></div>
