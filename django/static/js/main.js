@@ -53,7 +53,7 @@ $(function(){
     plan.emit('goal_random');
   });
   $('#run').on('click',function(ev){
-    plan.emit('plan_to_poses', [daPose]);
+    plan.emit('plan_to_poses', [currentGoal.pose]);
     $('#run').attr('disabled','disabled');
     $('#run').html('working ...');
   });
@@ -101,20 +101,32 @@ $(function(){
   });
 
   // -------------- GOALS ---------------------------
+  $('#goal-make').on('click',function(ev){
+    ev.preventDefault();
+    var i = eval('({'+$('#goal-data').val()+'})');
+    var pose = {
+      position: {
+       x: i.xyz[0], y: i.xyz[1], z: i.xyz[2]
+      }, orientation: {
+       x: i.q[0], y: i.q[1], z: i.q[2], w: i.q[3]
+      }
+    }
+    addGoal(pose);
+  });
 
   var unknownColor = new THREE.MeshBasicMaterial( { color: 0xffffff } );
   var reachableColor = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
   var unreachableColor = new THREE.MeshBasicMaterial( { color: 0xff0000 } );
   var goals = [];
   var currentGoal;
-  var daPose; 
   function addGoal(pose) {
-    daPose = pose;
+    console.log('goal pose: ', pose);
     position = pose.position;
     var geometry = new THREE.SphereGeometry(0.03,0.03,0.03);
     var material = unknownColor;
     currentGoal = new THREE.Mesh( geometry, material );
     currentGoal.position.set(position.x, position.y, position.z);
+    currentGoal.pose = pose;
     viewer.scene.add(currentGoal);
     goals.push(currentGoal);
   }
