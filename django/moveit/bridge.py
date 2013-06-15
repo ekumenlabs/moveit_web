@@ -1,4 +1,5 @@
 import rospy
+from moveit_ros_planning_interface import _moveit_move_group_interface
 from moveit_commander import MoveGroupCommander, PlanningSceneInterface
 from geometry_msgs.msg import Pose, PoseStamped
 from moveit_msgs.msg import PlanningSceneWorld, CollisionObject
@@ -28,9 +29,10 @@ class Planner(object):
 
         # Create group we'll use all along this demo
         self.move_group = MoveGroupCommander('right_arm_and_torso')
+        self._move_group = self.move_group._g
 
     def get_link_poses(self):
-        return self.move_group._g.get_link_poses_compressed()
+        return self._move_group.get_link_poses_compressed()
 
     # Create link back to socket.io namespace to allow emitting information
     def set_socket(self, namespace):
@@ -71,9 +73,17 @@ class Planner(object):
             point = trajectory.joint_trajectory.points[i]
             gevent.sleep((point.time_from_start - cur_time)/acceleration)
             cur_time = point.time_from_start
-            self.publish_position(trajectory, i)
-            self.emit('link_poses', self.get_link_poses())
+            # self.publish_position(trajectory, i)
+
+            # TODO: Only say "True" to update state on the last step of the trajectory
+            new_poses = self._move_group.update_robot_state(trajectory.joint_trajectory.joint_names,
+                    trajectory.joint_trajectory.points[i].positions, True)
+            self.emit('link_poses', new_poses)
+
         self.emit('status',{'text':'Ready to plan','ready':True})
+
+    def deleteme_joint_update(self):
+        print self._move_group.get_joints()
 
 _planner = None
 def get_planner():

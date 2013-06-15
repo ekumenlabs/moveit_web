@@ -57,9 +57,13 @@ $(function(){
   $('#scene').on('click',function(ev){
     loadScene();
   });
+  $('#deleteme_test').on('click',function(ev){
+    plan.emit('deleteme_test');
+  });
 
   // Socket.io events
   var plan = io.connect('/plan');
+  var initialPoseRequested = false;
   plan.on('status',function(statusMessage){
     if('text' in statusMessage) {
        $('#previous-status-message').html($('#status-message').html());
@@ -71,7 +75,10 @@ $(function(){
     if('ready' in statusMessage && statusMessage['ready']) {
       $('#run').removeAttr('disabled');
       $('#run').html('Random goal');
-      plan.emit('get_link_poses');
+      if(!initialPoseRequested) {
+        plan.emit('get_link_poses');
+        initialPoseRequested = true;
+      }
     }
   });
   plan.on('target_pose',function(position){
@@ -79,7 +86,6 @@ $(function(){
     addGoal( position)
   });
   plan.on('link_poses',function(poses){
-    console.log('Got poses: ', poses);
     updatePoses( poses);
   });
   plan.on('connect',function() {
@@ -108,14 +114,12 @@ $(function(){
     poses.global_link.forEach(function(poseAsList){
       var linkName = poseAsList[0];
       if('/'+linkName in linkNameToChildIndexMap) {
-        console.log('updating link: ' + linkName);
         var sceneNode = linkNameToChildIndexMap['/'+linkName];
         sceneNode.updatePose({
           position: { x: poseAsList[1], y:  poseAsList[2], z:  poseAsList[3] },
           orientation: { x: poseAsList[4], y: poseAsList[5], z: poseAsList[6], w: poseAsList[7] }
         });
       } else {
-        console.log('missed link: ' + linkName);
       }
     });
   }
