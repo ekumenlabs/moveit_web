@@ -49,8 +49,11 @@ $(function(){
   }
 
   // Hook run button to start demo
+  $('#random').on('click',function(ev){
+    plan.emit('goal_random');
+  });
   $('#run').on('click',function(ev){
-    plan.emit('plan_random');
+    plan.emit('plan_to_poses', [daPose]);
     $('#run').attr('disabled','disabled');
     $('#run').html('working ...');
   });
@@ -64,7 +67,6 @@ $(function(){
   });
   $('#deleteme_test').on('click',function(ev){
     // plan.emit('deleteme_test');
-    plan.emit('scene_changed', currentScene);
   });
 
   // Socket.io events
@@ -76,20 +78,20 @@ $(function(){
        $('#status-message').html(statusMessage['text']);
     }
     if('reachable' in statusMessage) {
-      lastGoal.material = statusMessage['reachable']?reachableColor:unreachableColor;
+      currentGoal.material = statusMessage['reachable']?reachableColor:unreachableColor;
     }
     if('ready' in statusMessage && statusMessage['ready']) {
       $('#run').removeAttr('disabled');
-      $('#run').html('Random goal');
+      $('#run').html('Run query');
       if(!initialPoseRequested) {
         plan.emit('get_link_poses');
         initialPoseRequested = true;
       }
     }
   });
-  plan.on('target_pose',function(position){
-    console.log('Will plan to position: ', position);
-    addGoal( position)
+  plan.on('target_pose', function(pose){
+    console.log('Will plan to position: ', pose);
+    addGoal( pose)
   });
   plan.on('link_poses',function(poses){
     updatePoses( poses);
@@ -104,14 +106,17 @@ $(function(){
   var reachableColor = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
   var unreachableColor = new THREE.MeshBasicMaterial( { color: 0xff0000 } );
   var goals = [];
-  var lastGoal;
-  function addGoal(position) {
+  var currentGoal;
+  var daPose; 
+  function addGoal(pose) {
+    daPose = pose;
+    position = pose.position;
     var geometry = new THREE.SphereGeometry(0.03,0.03,0.03);
     var material = unknownColor;
-    lastGoal = new THREE.Mesh( geometry, material );
-    lastGoal.position.set(position.x, position.y, position.z);
-    viewer.scene.add(lastGoal);
-    goals.push(lastGoal);
+    currentGoal = new THREE.Mesh( geometry, material );
+    currentGoal.position.set(position.x, position.y, position.z);
+    viewer.scene.add(currentGoal);
+    goals.push(currentGoal);
   }
 
   // --------------- SCENES -------------------------
@@ -163,6 +168,10 @@ $(function(){
         viewer.scene.add(scene);
       });
     });
+
+    // NOTE: The scene is set on the back-end regardless
+    // of the result of loading the client scene
+    plan.emit('scene_changed', currentScene);
   }
 
 

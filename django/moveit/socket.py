@@ -17,8 +17,11 @@ class PlanNamespace(BaseNamespace):
         self.emit('status',{'text':'ready to plan','ready':True})
         self.ready = True
 
-    def on_plan_random(self, *args):
-        self.planner.plan_to_random_goal()
+    def on_goal_random(self, *args):
+        self.planner.set_random_goal()
+
+    def on_plan_to_poses(self, poses):
+        self.planner.plan_to_poses(poses)
 
     def on_get_link_poses(self):
         if self.ready:

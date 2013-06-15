@@ -37,18 +37,11 @@ class Planner(object):
     def set_scene(self, scene):
         psw = PlanningSceneWorld()
         for co_json in scene['objects']:
-            # TODO: build pose, map filename to local fs
-            pose = PoseStamped()
-            pose.header.frame_id = "base_link"
-            pp = co_json['pose']['position']
-            pose.pose.position.x = pp['x']
-            pose.pose.position.y = pp['y']
-            pose.pose.position.z = pp['z']
-            pp = co_json['pose']['orientation']
-            pose.pose.orientation.x = pp['x']
-            pose.pose.orientation.y = pp['y']
-            pose.pose.orientation.z = pp['z']
-            pose.pose.orientation.w = pp['w']
+            # TODO: Fix orientation by using proper quaternions on the client
+            pose = self._make_pose(co_json['pose'])
+            # TODO: Decide what to do with STL vs. Collada. The client has a Collada
+            # loader but the PlanningSceneInterface can only deal with STL.
+            # TODO: Proper mapping between filenames and URLs
             # filename = '/home/julian/aaad/moveit/src/moveit_web/django%s' % co_json['meshUrl']
             filename = '/home/julian/aaad/moveit/src/moveit_web/django/static/meshes/table_4legs.stl'
             co = self.ps.make_mesh(co_json['name'], pose, filename)
@@ -68,11 +61,30 @@ class Planner(object):
             self.namespace.emit(event, data)
 
     def emit_new_goal(self, pose):
-        self.emit('target_pose', message_converter.convert_ros_message_to_dictionary(pose)['pose']['position'])
+        self.emit('target_pose', message_converter.convert_ros_message_to_dictionary(pose)['pose'])
 
-    def plan_to_random_goal(self):
+    def set_random_goal(self):
         goal_pose = self.move_group.get_random_pose()
         self.emit_new_goal(goal_pose)
+
+    def _make_pose(self, json_pose):
+        pose = PoseStamped()
+        pose.header.frame_id = "base_link"
+        pp = json_pose['position']
+        pose.pose.position.x = pp['x']
+        pose.pose.position.y = pp['y']
+        pose.pose.position.z = pp['z']
+        # TODO: Orientation is not working. See about
+        # properly using Quaternions everywhere
+        pp = json_pose['orientation']
+        pose.pose.orientation.x = pp['x']
+        pose.pose.orientation.y = pp['y']
+        pose.pose.orientation.z = pp['z']
+        pose.pose.orientation.w = pp['w']
+        return pose
+
+    def plan_to_poses(self, poses):
+        goal_pose = self._make_pose(poses[0])
         self.move_group.set_pose_target(goal_pose)
         self.emit('status',{'text':'Starting to plan'})
         trajectory = self.move_group.plan()
