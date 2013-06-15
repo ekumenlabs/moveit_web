@@ -1,0 +1,17 @@
+<launch>
+  <!-- Load robot description in parameter server -->
+  <include file="$(find pr2_moveit_config)/launch/planning_context.launch">
+    <arg name="load_robot_description" value="true"/>
+  </include>
+
+  <!-- Moveit node -->
+  <include file="$(find pr2_moveit_config)/launch/move_group.launch">
+    <arg name="allow_trajectory_execution" value="false"/>
+  </include>
+
+  <!-- RViz and the warehouse -->
+  <include file="$(find pr2_moveit_config)/launch/moveit_rviz.launch">
+    <arg name="config" value="true"/>
+  </include>
+  <include file="$(find pr2_moveit_config)/launch/default_warehouse_db.launch" />
+</launch>

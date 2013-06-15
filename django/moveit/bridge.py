@@ -17,6 +17,8 @@ class Planner(object):
     def __init__(self):
         rospy.init_node('moveit_web',disable_signals=True)
         self.jspub = rospy.Publisher('/update_joint_states',JointState)
+        self.psw_pub = rospy.Publisher('/planning_scene_world', PlanningSceneWorld)
+
         # Give time for subscribers to connect to the publisher
         rospy.sleep(1)
         self.goals = []
@@ -30,6 +32,29 @@ class Planner(object):
         # Create group we'll use all along this demo
         self.move_group = MoveGroupCommander('right_arm_and_torso')
         self._move_group = self.move_group._g
+        self.ps = PlanningSceneInterface()
+
+    def set_scene(self, scene):
+        psw = PlanningSceneWorld()
+        for co_json in scene['objects']:
+            # TODO: build pose, map filename to local fs
+            pose = PoseStamped()
+            pose.header.frame_id = "base_link"
+            pp = co_json['pose']['position']
+            pose.pose.position.x = pp['x']
+            pose.pose.position.y = pp['y']
+            pose.pose.position.z = pp['z']
+            pp = co_json['pose']['orientation']
+            pose.pose.orientation.x = pp['x']
+            pose.pose.orientation.y = pp['y']
+            pose.pose.orientation.z = pp['z']
+            pose.pose.orientation.w = pp['w']
+            # filename = '/home/julian/aaad/moveit/src/moveit_web/django%s' % co_json['meshUrl']
+            filename = '/home/julian/aaad/moveit/src/moveit_web/django/static/meshes/table_4legs.stl'
+            co = self.ps.make_mesh(co_json['name'], pose, filename)
+            psw.collision_objects.append(co)
+        self.psw_pub.publish(psw)
+
 
     def get_link_poses(self):
         return self._move_group.get_link_poses_compressed()

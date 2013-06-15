@@ -2,7 +2,7 @@ var model, urdf, table, viewer;
 $(function(){
   console.log("starting");
 
-  // Create viewer
+  // Viewer with grid
   viewer = new ROS3D.Viewer({
     divID : 'canvas',
     width : $('#canvas').width(),
@@ -10,30 +10,18 @@ $(function(){
     //height : window.innerHeight - 140,
     antialias : true
   });
-  // Add grid
   viewer.addObject(new ROS3D.Grid());
 
+  // --------------- ROBOT ----------------------
   $.get('/static/pr2_description/pr2.urdf',function(urdf_string){
     // Create URDF object
     var urdfModel = new ROSLIB.UrdfModel({
       string: urdf_string
     });
     model = urdfModel;
-    /*
-    var ros = new ROSLIB.Ros({
-      url: 'ws://'+window.document.domain+':9090'
-    });
-    var tfClient = new ROSLIB.TFClient({
-      ros: ros,
-      angularThres: 0.01,
-      transThres: 0.01,
-      rate: 10.0
-    }); */
     var theURDF = new ROS3D.Urdf({
       urdfModel: urdfModel,
       path: 'http://resources.robotwebtools.org/',
-      /* tfClient: tfClient
-      path: '/static/', */
       tfClient: {
         subscribe: function() {}
       } 
@@ -42,6 +30,23 @@ $(function(){
     viewer.addObject(theURDF);
     console.log("done");
   });
+  function updatePoses(poses) {
+    var linkNameToChildIndexMap = {};
+    urdf.children.forEach(function(sceneNode){
+      linkNameToChildIndexMap[sceneNode.frameID] = sceneNode;
+    });
+    poses.global_link.forEach(function(poseAsList){
+      var linkName = poseAsList[0];
+      if('/'+linkName in linkNameToChildIndexMap) {
+        var sceneNode = linkNameToChildIndexMap['/'+linkName];
+        sceneNode.updatePose({
+          position: { x: poseAsList[1], y:  poseAsList[2], z:  poseAsList[3] },
+          orientation: { x: poseAsList[4], y: poseAsList[5], z: poseAsList[6], w: poseAsList[7] }
+        });
+      } else {
+      }
+    });
+  }
 
   // Hook run button to start demo
   $('#run').on('click',function(ev){
@@ -58,7 +63,8 @@ $(function(){
     loadScene();
   });
   $('#deleteme_test').on('click',function(ev){
-    plan.emit('deleteme_test');
+    // plan.emit('deleteme_test');
+    plan.emit('scene_changed', currentScene);
   });
 
   // Socket.io events
@@ -92,10 +98,11 @@ $(function(){
     plan.emit('connected');
   });
 
+  // -------------- GOALS ---------------------------
+
   var unknownColor = new THREE.MeshBasicMaterial( { color: 0xffffff } );
   var reachableColor = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
   var unreachableColor = new THREE.MeshBasicMaterial( { color: 0xff0000 } );
-
   var goals = [];
   var lastGoal;
   function addGoal(position) {
@@ -106,47 +113,33 @@ $(function(){
     viewer.scene.add(lastGoal);
     goals.push(lastGoal);
   }
-  function updatePoses(poses) {
-    var linkNameToChildIndexMap = {};
-    urdf.children.forEach(function(sceneNode){
-      linkNameToChildIndexMap[sceneNode.frameID] = sceneNode;
-    });
-    poses.global_link.forEach(function(poseAsList){
-      var linkName = poseAsList[0];
-      if('/'+linkName in linkNameToChildIndexMap) {
-        var sceneNode = linkNameToChildIndexMap['/'+linkName];
-        sceneNode.updatePose({
-          position: { x: poseAsList[1], y:  poseAsList[2], z:  poseAsList[3] },
-          orientation: { x: poseAsList[4], y: poseAsList[5], z: poseAsList[6], w: poseAsList[7] }
-        });
-      } else {
-      }
-    });
-  }
 
+  // --------------- SCENES -------------------------
+  var currentScene;
   function loadScene() {
     // This would be a database object describing the scene
     var sceneHardcoded = {
+      id: 0,
       name: 'A Table',
       objects: [{
-        id: 't1',
-        name: 'table',
+        id: 0,
+        name: 'table 0',
         meshUrl: '/static/meshes/table_4legs.dae',
         pose: {
           position: { x: 0.5, y: -1, z: 0 },
           orientation: { x: 0, y: 0, z: 0, w: 0 }
         }
       },{
-        id: 't2',
-        name: 'table',
+        id: 1,
+        name: 'table 1',
         meshUrl: '/static/meshes/table_4legs.dae',
         pose: {
           position: { x: 0.5, y: -2.5, z: 0 },
           orientation: { x: 0, y: 0, z: 0, w: 0 }
         }
       },{
-        id: 't3',
-        name: 'table',
+        id: 2,
+        name: 'table 2',
         meshUrl: '/static/meshes/table_4legs.dae',
         pose: {
           position: { x: 0.5, y: -2.5, z: 0 },
@@ -154,19 +147,26 @@ $(function(){
         }
       }]
     };
+    currentScene = sceneHardcoded;
+    $('#scene-name').html(currentScene.name);
+
     // Load meshes and render them
+    // TODO: Materials ???
     sceneHardcoded.objects.forEach(function(object) {
       var loader = new ColladaLoader2();
       loader.load(object.meshUrl, function(dae){
         var scene = dae.scene;
         table = scene;
         mixin(scene.position, object.pose.position);
+        // TODO: Use Quaternion
         mixin(scene.rotation, object.pose.orientation);
         viewer.scene.add(scene);
       });
     });
   }
 
+
+  // -------------- UTILS --------------
   function mixin(into, what) {
     for(key in what) {
       into[key] = what[key];
