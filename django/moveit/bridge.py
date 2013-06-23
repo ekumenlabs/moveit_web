@@ -30,7 +30,8 @@ class Planner(object):
         self.jspub.publish(initial_joint_state)
 
         # Create group we'll use all along this demo
-        self.move_group = MoveGroupCommander('right_arm_and_torso')
+        # self.move_group = MoveGroupCommander('right_arm_and_torso')
+        self.move_group = MoveGroupCommander('base')
         self._move_group = self.move_group._g
         self.ps = PlanningSceneInterface()
 
@@ -64,12 +65,12 @@ class Planner(object):
         self.emit('target_pose', message_converter.convert_ros_message_to_dictionary(pose)['pose'])
 
     def set_random_goal(self):
-        goal_pose = self.move_group.get_random_pose()
+        goal_pose = self.move_group.get_random_pose('base_footprint')
         self.emit_new_goal(goal_pose)
 
     def _make_pose(self, json_pose):
         pose = PoseStamped()
-        pose.header.frame_id = "base_link"
+        pose.header.frame_id = "odom_combined"
         pp = json_pose['position']
         pose.pose.position.x = pp['x']
         pose.pose.position.y = pp['y']
@@ -85,7 +86,7 @@ class Planner(object):
 
     def plan_to_poses(self, poses):
         goal_pose = self._make_pose(poses[0])
-        self.move_group.set_pose_target(goal_pose)
+        self.move_group.set_pose_target(goal_pose,'base_footprint')
         self.emit('status',{'text':'Starting to plan'})
         trajectory = self.move_group.plan()
         if trajectory is None or len(trajectory.joint_trajectory.joint_names) == 0:
