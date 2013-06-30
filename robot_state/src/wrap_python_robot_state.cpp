@@ -48,7 +48,7 @@ class WebRobotStateWrapper : protected moveit_py_bindings_tools::ROScppInitializ
 public:
 
   // ROSInitializer is constructed first, and ensures ros::init() was called, if needed
-  WebRobotStateWrapper(const std::string &group_name) : moveit_py_bindings_tools::ROScppInitializer()
+  WebRobotStateWrapper() : moveit_py_bindings_tools::ROScppInitializer()
   {
   }
 
@@ -66,7 +66,8 @@ void wrap_robot_state()
   bp::def("roscpp_init", init_fn);
   bp::def("roscpp_shutdown", &moveit_py_bindings_tools::roscpp_shutdown);
 
-  bp::class_<WebRobotStateWrapper> WebRobotStateClass("WebRobotStateWrapper", bp::init<std::string>());
+  // bp::class_<WebRobotStateWrapper> WebRobotStateClass("WebRobotStateWrapper", bp::init<void>());
+  bp::class_<WebRobotStateWrapper> WebRobotStateClass("WebRobotStateWrapper");
 
   WebRobotStateClass.def("test", &WebRobotStateWrapper::test);
 }
