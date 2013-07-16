@@ -63,7 +63,7 @@ $(function(){
     });
   });
   $('#scene-load').on('click',function(ev){
-    loadScene();
+    selectScene();
   });
   $('#robot-load').on('click',function(ev){
     alert("Not implemented");
@@ -140,9 +140,8 @@ $(function(){
 
   // --------------- SCENES -------------------------
   var currentScene;
-  function loadScene() {
-    // Step B: Simulate toggling between 'Blank' and 'Tables'
-    if(currentScene == undefined || currentScene.name == 'Blank') {
+  function loadScene(sceneId) {
+    if(sceneId == 0) {
       // This would be a database object describing the scene
       currentScene = {
         id: 0,
@@ -186,6 +185,24 @@ $(function(){
     // NOTE: The scene is set on the back-end regardless
     // of the result of loading the client scene
     plan.emit('scene_changed', currentScene);
+  }
+  function selectScene() {
+    $('#canvas').hide();
+    $('#scene-choose').show();
+    var picker = $('#scene-select').
+      imagepicker({
+        hide_select: true,
+        selected: function(ev, a) {
+          $('#scene-select-name').html(
+            picker.selectedOptions[0].text
+          );
+        }
+      })[0];
+    $('#scene-select-done').one('click',function(ev){
+      $('#scene-choose').hide();
+      $('#canvas').show();
+      loadScene(Number(picker.selectedOptions[0].value));
+    });
   }
 
   // HACK: Low-level-ish: keep track of which objects we added to the scene

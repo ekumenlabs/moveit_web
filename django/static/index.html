@@ -19,6 +19,7 @@
         </style>
         <link rel="stylesheet" href="css/bootstrap-responsive.min.css">
         <link rel="stylesheet" href="css/main.css">
+        <link rel="stylesheet" href="css/image-picker.css">
 
         <script src="js/vendor/modernizr-2.6.2-respond-1.1.0.min.js"></script>
     </head>
@@ -90,6 +91,21 @@
             </div>
             <div class="span9">
               <div id="canvas"></div>
+              <div id="scene-choose" style="display:none;">
+                <table class="table">
+                  <tr><td>
+                    <span>Scene Name: </span>
+                    <span id="scene-select-name">Blank</span>
+                    <button class="btn btn-small pull-right" id="scene-select-done">Done</button>
+                  </td></tr>
+                  <tr><td>
+                    <select id="scene-select" class="image-picker">
+                      <option data-img-src="/static/scenes/1-thumb.png" value="1">Blank</option>
+                      <option data-img-src="/static/scenes/0-thumb.png" value="0">A Table</option>
+                    </select>
+                  </td></tr>
+                </table>
+              </div>
             </div>
           </div>
           <hr>
@@ -110,6 +126,7 @@
         <script src="js/vendor/roslib.min.js"></script>
         <script src="js/vendor/ros3d.js"></script>
         <script src="js/vendor/socket.io.js"></script>
+        <script src="js/vendor/image-picker.min.js"></script>
         <script src="js/main.js"></script>
 
         <script type="text/javascript">
