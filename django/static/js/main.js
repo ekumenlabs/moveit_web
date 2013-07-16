@@ -62,8 +62,11 @@ $(function(){
       viewer.scene.remove(goal);
     });
   });
-  $('#scene').on('click',function(ev){
+  $('#scene-load').on('click',function(ev){
     loadScene();
+  });
+  $('#robot-load').on('click',function(ev){
+    alert("Not implemented");
   });
   $('#deleteme_test').on('click',function(ev){
     // plan.emit('deleteme_test');

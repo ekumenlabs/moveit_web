@@ -47,7 +47,16 @@
               <table class="table">
                 <tr>
                   <td>
-                 Robot: PR2
+                    <span>Robot: </span>
+                    <span id="robot-name">PR2</span>
+                    <button class="btn btn-small pull-right" id="robot-load">Select</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span>Scene: </span>
+                    <span id="scene-name">Blank</span>
+                <button class="btn btn-small pull-right" id="scene-load">Select</button>
                   </td>
                 </tr>
                 <tr>
@@ -70,12 +79,6 @@
                 <tr>
                   <td>
                 Prevoius status: <span id="previous-status-message"></span>
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                <button class="btn btn-small" id="scene">Load scene</button>
-                Scene: <span id="scene-name"></span>
                   </td>
                 </tr>
                 <tr>
