@@ -37,6 +37,7 @@
 #include <boost/python.hpp>
 #include <ros/ros.h>
 #include <moveit/py_bindings_tools/roscpp_initializer.h>
+#include <moveit/robot_state/robot_state.h>
 
 namespace bp = boost::python;
 
@@ -45,11 +46,49 @@ namespace moveit_web
 
 class WebRobotStateWrapper : protected moveit_py_bindings_tools::ROScppInitializer
 {
+protected:
+  robot_state::RobotStatePtr _robot_state;
 public:
 
   // ROSInitializer is constructed first, and ensures ros::init() was called, if needed
   WebRobotStateWrapper() : moveit_py_bindings_tools::ROScppInitializer()
   {
+  }
+
+  // Returns stamped poses for each of the links in the Robot for the current
+  // state
+  bp::dict getLinkPoses()
+  {
+    // TODO: Make this more standardized, perhaps more similar to a TF message
+    /* Returns the pose of all links in global_link frame using a custom format:
+     * { 'global_link': [
+     *    ('<link_name>', tr.x, tr.y, tr.z, ro.x, ro.y, ro.z, ro.w),
+     *    ...
+     * ]}
+     */
+    bp::dict current_state_dict;
+    bp::list link_state_list;
+    std::vector<robot_state::LinkState*> linkStateVector = _robot_state->getLinkStateVector();
+    for(int i=0; i < linkStateVector.size(); i++) {
+      Eigen::Affine3d link_pose = linkStateVector[i]->getGlobalLinkTransform();
+      bp::list link_state;
+      // link_name:
+      link_state.append(linkStateVector[i]->getName());
+      // translation coordinates:
+      link_state.append(link_pose.translation().x());
+      link_state.append(link_pose.translation().y());
+      link_state.append(link_pose.translation().z());
+      // rotation coordinates:
+      Eigen::Quaterniond link_rotation(link_pose.rotation());
+      link_state.append(link_rotation.x());
+      link_state.append(link_rotation.y());
+      link_state.append(link_rotation.z());
+      link_state.append(link_rotation.w());
+      // add to list of states
+      link_state_list.append(link_state);
+    }
+    current_state_dict["global_link"] = link_state_list;
+    return current_state_dict;
   }
 
   bp::dict test()
@@ -70,6 +109,7 @@ void wrap_robot_state()
   bp::class_<WebRobotStateWrapper> WebRobotStateClass("WebRobotStateWrapper");
 
   WebRobotStateClass.def("test", &WebRobotStateWrapper::test);
+  WebRobotStateClass.def("getLinkPoses", &WebRobotStateWrapper::getLinkPoses);
 }
 
 }

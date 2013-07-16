@@ -2,4 +2,4 @@
 
 from moveit_web_robot_state import moveit_web_robot_state
 mvt = moveit_web_robot_state.WebRobotStateWrapper()
-print mvt.test()
+print mvt.getLinkPoses()
