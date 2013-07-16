@@ -141,37 +141,45 @@ $(function(){
   // --------------- SCENES -------------------------
   var currentScene;
   function loadScene() {
-    // This would be a database object describing the scene
-    var sceneHardcoded = {
-      id: 0,
-      name: 'A Table',
-      objects: [{
+    // Step B: Simulate toggling between 'Blank' and 'Tables'
+    if(currentScene == undefined || currentScene.name == 'Blank') {
+      // This would be a database object describing the scene
+      currentScene = {
         id: 0,
-        name: 'table 0',
-        meshUrl: '/static/meshes/table_4legs.dae',
-        pose: {
-          position: { x: 0.5, y: -1, z: 0 },
-          orientation: { x: 0, y: 0, z: 0, w: 0 }
-        }
-      },{
+        name: 'A Table',
+        objects: [{
+          id: 0,
+          name: 'table 0',
+          meshUrl: '/static/meshes/table_4legs.dae',
+          pose: {
+            position: { x: 0.5, y: -1, z: 0 },
+            orientation: { x: 0, y: 0, z: 0, w: 0 }
+          }
+        },{
+          id: 1,
+          name: 'table 1',
+          meshUrl: '/static/meshes/table_4legs.dae',
+          pose: {
+            position: { x: 0.5, y: -2.5, z: 0 },
+            orientation: { x: 0, y: 0, z: 0, w: 0 }
+          }
+        },{
+          id: 2,
+          name: 'table 2',
+          meshUrl: '/static/meshes/table_4legs.dae',
+          pose: {
+            position: { x: 0.5, y: -2.5, z: 0 },
+            orientation: { x: 0, y: 0, z: 3.14159/2.0, w: 0 }
+          }
+        }]
+      };
+    } else {
+      currentScene = {
         id: 1,
-        name: 'table 1',
-        meshUrl: '/static/meshes/table_4legs.dae',
-        pose: {
-          position: { x: 0.5, y: -2.5, z: 0 },
-          orientation: { x: 0, y: 0, z: 0, w: 0 }
-        }
-      },{
-        id: 2,
-        name: 'table 2',
-        meshUrl: '/static/meshes/table_4legs.dae',
-        pose: {
-          position: { x: 0.5, y: -2.5, z: 0 },
-          orientation: { x: 0, y: 0, z: 3.14159/2.0, w: 0 }
-        }
-      }]
-    };
-    currentScene = sceneHardcoded;
+        name: 'Blank',
+        objects: []
+      };
+    }
 
     renderScene();
 
@@ -180,10 +188,19 @@ $(function(){
     plan.emit('scene_changed', currentScene);
   }
 
+  // HACK: Low-level-ish: keep track of which objects we added to the scene
+  // as 'environment' (as opposed to the robot) so that we can remove them
+  // when we change from one scene to the next
+  var _sceneObjects = [];
   function renderScene() {
     $('#scene-name').html(currentScene.name);
 
-    // Load meshes and render them
+    // Remove previosly-added scene objects
+    _sceneObjects.forEach(function(object) {
+      viewer.scene.remove(object);
+    });
+
+    // Load new meshes and render them
     // TODO: Materials ???
     currentScene.objects.forEach(function(object) {
       var loader = new ColladaLoader2();
@@ -194,6 +211,7 @@ $(function(){
         // TODO: Use Quaternion
         mixin(scene.rotation, object.pose.orientation);
         viewer.scene.add(scene);
+        _sceneObjects.push(scene);
       });
     });
   }
