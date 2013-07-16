@@ -99,6 +99,10 @@ $(function(){
   plan.on('connect',function() {
     plan.emit('connected');
   });
+  plan.on('current scene',function(scene) {
+    currentScene = scene;
+    renderScene();
+  });
 
   // -------------- GOALS ---------------------------
   $('#goal-make').on('click',function(ev){
@@ -165,11 +169,20 @@ $(function(){
       }]
     };
     currentScene = sceneHardcoded;
+
+    renderScene();
+
+    // NOTE: The scene is set on the back-end regardless
+    // of the result of loading the client scene
+    plan.emit('scene_changed', currentScene);
+  }
+
+  function renderScene() {
     $('#scene-name').html(currentScene.name);
 
     // Load meshes and render them
     // TODO: Materials ???
-    sceneHardcoded.objects.forEach(function(object) {
+    currentScene.objects.forEach(function(object) {
       var loader = new ColladaLoader2();
       loader.load(object.meshUrl, function(dae){
         var scene = dae.scene;
@@ -180,10 +193,6 @@ $(function(){
         viewer.scene.add(scene);
       });
     });
-
-    // NOTE: The scene is set on the back-end regardless
-    // of the result of loading the client scene
-    plan.emit('scene_changed', currentScene);
   }
 
 

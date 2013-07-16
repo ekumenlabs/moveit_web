@@ -14,7 +14,9 @@ class PlanNamespace(BaseNamespace):
         logger.debug('user %s connected' % self.request.user)
         self.planner = get_planner()
         self.planner.set_socket(self)
-        self.emit('status',{'text':'ready to plan','ready':True})
+        self.emit('status', self.planner.status)
+        if self.planner.current_scene is not None:
+            self.emit('current scene', self.planner.current_scene)
         self.ready = True
 
     def on_goal_random(self, *args):
