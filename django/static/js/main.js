@@ -68,9 +68,6 @@ $(function(){
   $('#robot-load').on('click',function(ev){
     alert("Not implemented");
   });
-  $('#deleteme_test').on('click',function(ev){
-    // plan.emit('deleteme_test');
-  });
 
   // Socket.io events
   var plan = io.connect('/plan');

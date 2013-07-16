@@ -29,8 +29,5 @@ class PlanNamespace(BaseNamespace):
         if self.ready:
             self.emit('link_poses', self.planner.get_link_poses())
 
-    def on_deleteme_test(self):
-        self.planner.deleteme_joint_update()
-
     def on_scene_changed(self, scene):
         self.planner.set_scene(scene)

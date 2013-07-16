@@ -141,9 +141,6 @@ class Planner(object):
         self.status = {'text':'Ready to plan','ready':True}
         self.emit('status', self.status)
 
-    def deleteme_joint_update(self):
-        print self._move_group.get_joints()
-
 _planner = None
 def get_planner():
     global _planner
