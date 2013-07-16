@@ -71,10 +71,8 @@ $(function(){
 
   // Socket.io events
   var plan = io.connect('/plan');
-  var initialPoseRequested = false;
   plan.on('status',function(statusMessage){
     if('text' in statusMessage) {
-       $('#previous-status-message').html($('#status-message').html());
        $('#status-message').html(statusMessage['text']);
     }
     if('reachable' in statusMessage) {
@@ -82,11 +80,7 @@ $(function(){
     }
     if('ready' in statusMessage && statusMessage['ready']) {
       $('#run').removeAttr('disabled');
-      $('#run').html('Run query');
-      if(!initialPoseRequested) {
-        plan.emit('get_link_poses');
-        initialPoseRequested = true;
-      }
+      $('#run').html('Run');
     }
   });
   plan.on('target_pose', function(pose){

@@ -15,9 +15,16 @@ class PlanNamespace(BaseNamespace):
         self.planner = get_planner()
         self.planner.set_socket(self)
         self.emit('status', self.planner.status)
+        self.ready = True
+        self.emit('link_poses', self.planner.get_link_poses())
         if self.planner.current_scene is not None:
             self.emit('current scene', self.planner.current_scene)
-        self.ready = True
+        else:
+            self.emit('current scene', {
+                'id': 1,
+                'name': 'Blank',
+                'objects': []
+            })
 
     def on_goal_random(self, *args):
         self.planner.set_random_goal()

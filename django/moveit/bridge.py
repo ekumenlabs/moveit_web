@@ -23,6 +23,7 @@ class Planner(object):
     # Current state of the 'session' (right now, only one)
     current_scene = None
     status = None
+    link_poses = None
 
     def __init__(self):
         rospy.init_node('moveit_web',disable_signals=True)
@@ -67,7 +68,9 @@ class Planner(object):
 
 
     def get_link_poses(self):
-        return self._move_group.get_link_poses_compressed()
+        if self.link_poses is None:
+            self.link_poses = self._move_group.get_link_poses_compressed()
+        return self.link_poses
 
     # Create link back to socket.io namespace to allow emitting information
     def set_socket(self, namespace):
@@ -136,6 +139,7 @@ class Planner(object):
             # TODO: Only say "True" to update state on the last step of the trajectory
             new_poses = self._move_group.update_robot_state(trajectory.joint_trajectory.joint_names,
                     trajectory.joint_trajectory.points[i].positions, True)
+            self.link_poses = new_poses
             self.emit('link_poses', new_poses)
 
         self.status = {'text':'Ready to plan','ready':True}

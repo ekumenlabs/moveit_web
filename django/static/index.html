@@ -62,11 +62,15 @@
                 </tr>
                 <tr>
                   <td>
+                Status: <span id="status-message"></span>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
                 <button class="btn btn-small" id="random">Random goal</button>
                 <button class="btn btn-small" id="load">Load goals</button>
                 <button class="btn btn-small" id="clear">Clear goals</button>
-                <button class="btn btn-small" id="run">Run query</button>
-                <form class="form-inline">
+                <form class="form-inline" style="display:none;">
                   <button class="btn btn-small" id="goal-make">Goal at:</button>
                   <input id="goal-data" type="text" class="input-small" value="xyz:[0,0,0],q:[1,0,0,0]" />
                 </form>
@@ -74,12 +78,7 @@
                 </tr>
                 <tr>
                   <td>
-                Status: <span id="status-message"></span>
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                Prevoius status: <span id="previous-status-message"></span>
+                <button class="btn btn-small pull-right" id="run">Run</button>
                   </td>
                 </tr>
                </table>
