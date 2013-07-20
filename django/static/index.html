@@ -19,6 +19,7 @@
         </style>
         <link rel="stylesheet" href="css/bootstrap-responsive.min.css">
         <link rel="stylesheet" href="css/main.css">
+        <link rel="stylesheet" href="css/image-picker.css">
 
         <script src="js/vendor/modernizr-2.6.2-respond-1.1.0.min.js"></script>
     </head>
@@ -44,24 +45,61 @@
         <div class="container-fluid">
           <div class="row-fluid">
             <div class="span3">
-              <div class="row-fluid">
-                <span>
-                 Robot: PR2
-                </span>
-              </div>
-              <div class="row-fluid">
-                <button id="run">Random goal</button>
-                <button id="clear">Clear goals</button>
-              </div>
-              <div class="row-fluid">
+              <table class="table">
+                <tr>
+                  <td>
+                    <span>Robot: </span>
+                    <span id="robot-name">PR2</span>
+                    <button class="btn btn-small pull-right" id="robot-load">Select</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span>Scene: </span>
+                    <span id="scene-name">Blank</span>
+                <button class="btn btn-small pull-right" id="scene-load">Select</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
                 Status: <span id="status-message"></span>
-              </div>
-              <div class="row-fluid">
-                Prevoius status: <span id="previous-status-message"></span>
-              </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                <button class="btn btn-small" id="random">Random goal</button>
+                <button class="btn btn-small" id="load" style="display:none;">Load goals</button>
+                <button class="btn btn-small" id="clear">Clear goals</button>
+                <form class="form-inline" style="display:none;">
+                  <button class="btn btn-small" id="goal-make">Goal at:</button>
+                  <input id="goal-data" type="text" class="input-small" value="xyz:[0,0,0],q:[1,0,0,0]" />
+                </form>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                <button class="btn btn-small pull-right" id="run">Run</button>
+                  </td>
+                </tr>
+               </table>
             </div>
             <div class="span9">
               <div id="canvas"></div>
+              <div id="scene-choose" style="display:none;">
+                <table class="table">
+                  <tr><td>
+                    <span>Scene Name: </span>
+                    <span id="scene-select-name">Blank</span>
+                    <button class="btn btn-small pull-right" id="scene-select-done">Done</button>
+                  </td></tr>
+                  <tr><td>
+                    <select id="scene-select" class="image-picker">
+                      <option data-img-src="/static/scenes/1-thumb.png" value="1">Blank</option>
+                      <option data-img-src="/static/scenes/0-thumb.png" value="0">A Table</option>
+                    </select>
+                  </td></tr>
+                </table>
+              </div>
             </div>
           </div>
           <hr>
@@ -80,8 +118,9 @@
         <script src="js/vendor/ColladaLoader2.min.js"></script>
         <script src="js/vendor/eventemitter2.min.js"></script>
         <script src="js/vendor/roslib.min.js"></script>
-        <script src="js/vendor/ros3d.min.js"></script>
+        <script src="js/vendor/ros3d.js"></script>
         <script src="js/vendor/socket.io.js"></script>
+        <script src="js/vendor/image-picker.min.js"></script>
         <script src="js/main.js"></script>
 
         <script type="text/javascript">
