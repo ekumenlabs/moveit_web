@@ -132,7 +132,9 @@ class Planner(object):
         acceleration = 4.0
         for i in range(len(trajectory.joint_trajectory.points)):
             point = trajectory.joint_trajectory.points[i]
-            gevent.sleep((point.time_from_start - cur_time)/acceleration)
+            # JAC: temporarily disable acceleration: 
+            #   TypeError: unsupported operand type(s) for -: 'Duration' and 'float'
+            # gevent.sleep((point.time_from_start - cur_time)/acceleration)
             cur_time = point.time_from_start
             # self.publish_position(trajectory, i)
 
