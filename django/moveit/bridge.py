@@ -128,19 +128,19 @@ class Planner(object):
         self.jspub.publish(jsmsg)
 
     def publish_trajectory(self, trajectory):
-        cur_time = 0.0
+        cur_time = trajectory.joint_trajectory.points[0].time_from_start
         acceleration = 4.0
         for i in range(len(trajectory.joint_trajectory.points)):
             point = trajectory.joint_trajectory.points[i]
-            # JAC: temporarily disable acceleration: 
-            #   TypeError: unsupported operand type(s) for -: 'Duration' and 'float'
-            # gevent.sleep((point.time_from_start - cur_time)/acceleration)
+            wait_duration = point.time_from_start - cur_time
+            wait_duration_time = wait_duration.to_sec() + wait_duration.to_nsec() * 1e-9
+            gevent.sleep(wait_duration_time/acceleration)
             cur_time = point.time_from_start
             # self.publish_position(trajectory, i)
 
             # TODO: Only say "True" to update state on the last step of the trajectory
             new_poses = self._move_group.update_robot_state(trajectory.joint_trajectory.joint_names,
-                    trajectory.joint_trajectory.points[i].positions, True)
+                    list(trajectory.joint_trajectory.points[i].positions), True)
             self.link_poses = new_poses
             self.emit('link_poses', new_poses)
 
