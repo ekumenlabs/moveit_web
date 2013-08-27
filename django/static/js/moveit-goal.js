@@ -26,18 +26,15 @@ Axes = function(options) {
     isLong = isLong || false;
 
     var lengthFactor = shortLine;
+    var colorHex = 0x0000ff;
     var shaftLength = (shortLine - headLength) * scalarFactor;
     if (isLong) {
       var lengthFactor = longLine;
+      var colorHex = 0xff0000;
       var shaftLength = (longLine - headLength) * scalarFactor;
     }
-
     // set the color of the axis
-    var color = new THREE.Color();
-    color.setRGB(axis.x, axis.y, axis.z);
-    var material = new THREE.MeshBasicMaterial({
-      color : color.getHex()
-    });
+    var material = new THREE.MeshBasicMaterial({ color : colorHex });
 
     // setup the rotation information
     var rotAxis = new THREE.Vector3();
