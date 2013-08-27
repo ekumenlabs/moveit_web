@@ -1,10 +1,11 @@
+
 // @constructor
 //
-// @param params - object with goal options:
 // @param pose (optional) - ROSLIB.Pose object to call setPose() with.
 // @param scene (optional) - THREE.Scene object (as in ``new ROS3D.Viewer().scene``) to add the goal to.
-MoveItGoal = function (params, pose, scene) {
-  params = params || {};
+MoveItGoal = function (pose, scene) {
+  // Signal THREE.js this objects use quaternions to express local rotations
+  this.useQuaternion = true;
 
   // contruct the small dot to show the position
   var dot_mesh = new THREE.Mesh(
@@ -13,14 +14,14 @@ MoveItGoal = function (params, pose, scene) {
   );
   this.add(dot_mesh);
 
-  // construct the axes
+  // construct the axes, and keep a reference to show rotations
   var axes = new ROS3D.Axes();
   this.add(axes);
 
   // TODO: construct the direction arrow
 
   // add this goal to the general repository
-  MoveItGoal.allGoals.push(this);
+  MoveItGoal.all.push(this);
 
   // set position and orientation, if given
   pose && this.setPose(pose);
@@ -32,8 +33,8 @@ MoveItGoal = function (params, pose, scene) {
 // One repository for all goals created.
 //
 // TODO: allow to remove this goals from the scene and deallocate them from
-// memory as a one "clearAllGoals()" call.
-MoveItGoal.allGoals = [];
+// memory as a one "clearAll()" call.
+MoveItGoal.all = [];
 
 MoveItGoal.dotGeometry = new THREE.SphereGeometry(0.03,0.03,0.03);
 
@@ -45,8 +46,9 @@ MoveItGoal.statusMaterials = {
 
 // Returns a reference to the last goal created, null if there's none.
 MoveItGoal.latest = function () {
-  if (this.allGoals.length > 0)
-    return this.allGoals[this.allGoals.length - 1];
+  var len = MoveItGoal.all.length;
+  if (len > 0)
+    return MoveItGoal.all[len - 1];
   return null;
 }
 
@@ -66,5 +68,13 @@ MoveItGoal.prototype.setPosition = function (position) {
   this.position.z = position.z;
 }
 
-MoveItGoal.prototype.setOrientation = function (postion) {
+MoveItGoal.prototype.setOrientation = function (orientation) {
+  // NOTE that a ROSLIB.Quaternion is not a THREE.Quaternion... it doesn't even
+  // share a prototype, _as it should_. Check out the code and see.
+  this.quaternion = new THREE.Quaternion(
+    orientation.x,
+    orientation.y,
+    orientation.z,
+    orientation.w
+  );
 }

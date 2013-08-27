@@ -24,7 +24,7 @@ $(function(){
       path: 'http://resources.robotwebtools.org/',
       tfClient: {
         subscribe: function() {}
-      } 
+      }
     });
     urdf = theURDF;
     viewer.addObject(theURDF);
@@ -53,12 +53,12 @@ $(function(){
     plan.emit('goal_random');
   });
   $('#run').on('click',function(ev){
-    plan.emit('plan_to_poses', [currentGoal.pose]);
+    plan.emit('plan_to_poses', [MoveItGoal.latest().pose]);
     $('#run').attr('disabled','disabled');
     $('#run').html('working ...');
   });
   $('#clear').on('click',function(ev){
-    MoveItGoal.allGoals.forEach(function(goal){
+    MoveItGoal.all.forEach(function(goal){
       viewer.scene.remove(goal);
     });
   });
@@ -76,7 +76,7 @@ $(function(){
        $('#status-message').html(statusMessage['text']);
     }
     if('reachable' in statusMessage) {
-      currentGoal.material = statusMessage['reachable']?reachableColor:unreachableColor;
+      MoveItGoal.latest().material = statusMessage['reachable']?reachableColor:unreachableColor;
     }
     if('ready' in statusMessage && statusMessage['ready']) {
       $('#run').removeAttr('disabled');
@@ -118,7 +118,7 @@ $(function(){
   var goals = [];
   var currentGoal;
   function addGoal(pose) {
-    var goal = new MoveItGoal(null, pose, viewer.scene);
+    var goal = new MoveItGoal(pose, viewer.scene);
   }
   function addGoal_(pose) {
     console.log('goal pose: ', pose);
