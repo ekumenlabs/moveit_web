@@ -132,6 +132,9 @@ MoveItGoal.prototype = new THREE.Object3D();
 MoveItGoal.prototype.setPose = function (pose) {
   this.setPosition(pose.position);
   this.setOrientation(pose.orientation);
+
+  // Keep a reference to the original pose to serialize
+  this.pose = pose;
 }
 
 MoveItGoal.prototype.setPosition = function (position) {
