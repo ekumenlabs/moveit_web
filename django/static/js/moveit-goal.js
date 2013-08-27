@@ -13,19 +13,24 @@ Axes = function(options) {
   var shaftRadius = options.shaftRadius || 0.008;
   var headRadius = options.headRadius || 0.023;
   var headLength = options.headLength || 0.1;
-  var longLine = 1;
-  var shortLine = longLine * .5;
+  var longLine = options.longLine || .5;
+  var shortLine = options.shortLine || (longLine * .5);
+  var scalarFactor = options.scalarFactor || 1;
 
   THREE.Object3D.call(this);
 
   // create the cylinders for the objects
-  this.longLineGeom = new THREE.CylinderGeometry(shaftRadius, shaftRadius, longLine - headLength);
-  this.shortLineGeom = new THREE.CylinderGeometry(shaftRadius, shaftRadius, shortLine - headLength);
   this.headGeom = new THREE.CylinderGeometry(0, headRadius, headLength);
 
   function addAxis(axis, isLong) {
     isLong = isLong || false;
-    var scalarFactor = isLong ? 0.95 : 0.48;
+
+    var lengthFactor = shortLine;
+    var shaftLength = (shortLine - headLength) * scalarFactor;
+    if (isLong) {
+      var lengthFactor = longLine;
+      var shaftLength = (longLine - headLength) * scalarFactor;
+    }
 
     // set the color of the axis
     var color = new THREE.Color();
@@ -43,16 +48,17 @@ Axes = function(options) {
     // create the arrow
     var arrow = new THREE.Mesh(that.headGeom, material);
     arrow.position = axis.clone();
-    arrow.position.multiplyScalar(scalarFactor);
+    arrow.position.multiplyScalar(lengthFactor * 0.95);
     arrow.useQuaternion = true;
     arrow.quaternion = rot;
     arrow.updateMatrix();
     that.add(arrow);
 
     // create the line
-    var line = new THREE.Mesh(isLong ? that.longLineGeom : that.shortLineGeom, material);
+    var lineGeom = new THREE.CylinderGeometry(shaftRadius, shaftRadius, shaftLength * scalarFactor);
+    var line = new THREE.Mesh(lineGeom, material);
     line.position = axis.clone();
-    line.position.multiplyScalar(scalarFactor / 2);
+    line.position.multiplyScalar(lengthFactor * 0.43);
     line.useQuaternion = true;
     line.quaternion = rot;
     line.updateMatrix();
