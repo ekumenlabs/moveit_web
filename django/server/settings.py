@@ -1,4 +1,5 @@
 # Django settings for server project.
+import os.path
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -6,6 +7,9 @@ TEMPLATE_DEBUG = DEBUG
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )
+
+# The absolute path to the root of the Django project.
+PROJECT_ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
 
 MANAGERS = ADMINS
 

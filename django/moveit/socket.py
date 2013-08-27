@@ -1,9 +1,13 @@
 from socketio.namespace import BaseNamespace
+from django.conf import settings
+from os.path import join
 
 from bridge import get_planner
 
 import logging
 logger = logging.getLogger('moveit.socket')
+
+MESHES_ROOT = join(settings.PROJECT_ROOT, 'static', 'meshes')
 
 
 class PlanNamespace(BaseNamespace):
@@ -39,4 +43,4 @@ class PlanNamespace(BaseNamespace):
             self.emit('link_poses', self.planner.get_link_poses())
 
     def on_scene_changed(self, scene):
-        self.planner.set_scene(scene)
+        self.planner.set_scene(scene, MESHES_ROOT)

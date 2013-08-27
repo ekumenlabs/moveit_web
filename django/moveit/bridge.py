@@ -1,3 +1,4 @@
+import os.path
 import rospy
 from moveit_commander import MoveGroupCommander, PlanningSceneInterface
 from geometry_msgs.msg import PoseStamped
@@ -51,7 +52,7 @@ class Planner(object):
     def get_scene(self):
         return self.current_scene
 
-    def set_scene(self, scene):
+    def set_scene(self, scene, meshes_root):
         self.current_scene = scene
         psw = PlanningSceneWorld()
         for co_json in scene['objects']:
@@ -62,7 +63,7 @@ class Planner(object):
             # TODO: Proper mapping between filenames and URLs filename =
             # '/home/julian/aaad/moveit/src/moveit_web/django%s' %
             # co_json['meshUrl']
-            filename = '/home/julian/aaad/moveit/src/moveit_web/django/static/meshes/table_4legs.stl'
+            filename = os.path.join(meshes_root, 'table_4legs.stl')
             co = self.ps.make_mesh(co_json['name'], pose, filename)
             psw.collision_objects.append(co)
         self.psw_pub.publish(psw)
