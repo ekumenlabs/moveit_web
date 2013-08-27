@@ -58,7 +58,7 @@ $(function(){
     $('#run').html('working ...');
   });
   $('#clear').on('click',function(ev){
-    goals.forEach(function(goal){
+    MoveItGoal.allGoals.forEach(function(goal){
       viewer.scene.remove(goal);
     });
   });
@@ -118,6 +118,9 @@ $(function(){
   var goals = [];
   var currentGoal;
   function addGoal(pose) {
+    var goal = new MoveItGoal(null, pose, viewer.scene);
+  }
+  function addGoal_(pose) {
     console.log('goal pose: ', pose);
     position = pose.position;
     var geometry = new THREE.SphereGeometry(0.03,0.03,0.03);
