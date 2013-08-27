@@ -1,12 +1,11 @@
 import rospy
-from moveit_ros_planning_interface import _moveit_move_group_interface
 from moveit_commander import MoveGroupCommander, PlanningSceneInterface
-from geometry_msgs.msg import Pose, PoseStamped
-from moveit_msgs.msg import PlanningSceneWorld, CollisionObject
+from geometry_msgs.msg import PoseStamped
+from moveit_msgs.msg import PlanningSceneWorld
 from sensor_msgs.msg import JointState
 from rospy_message_converter import message_converter
-import json
 import gevent
+
 
 class Planner(object):
     move_group = None
@@ -26,9 +25,10 @@ class Planner(object):
     link_poses = None
 
     def __init__(self):
-        rospy.init_node('moveit_web',disable_signals=True)
-        self.jspub = rospy.Publisher('/update_joint_states',JointState)
-        self.psw_pub = rospy.Publisher('/planning_scene_world', PlanningSceneWorld)
+        rospy.init_node('moveit_web', disable_signals=True)
+        self.jspub = rospy.Publisher('/update_joint_states', JointState)
+        self.psw_pub = rospy.Publisher('/planning_scene_world',
+                                       PlanningSceneWorld)
 
         # Give time for subscribers to connect to the publisher
         rospy.sleep(1)
@@ -46,7 +46,7 @@ class Planner(object):
         self._move_group = self.move_group._g
         self.ps = PlanningSceneInterface()
 
-        self.status = {'text':'ready to plan','ready':True}
+        self.status = {'text': 'ready to plan', 'ready': True}
 
     def get_scene(self):
         return self.current_scene
@@ -57,15 +57,15 @@ class Planner(object):
         for co_json in scene['objects']:
             # TODO: Fix orientation by using proper quaternions on the client
             pose = self._make_pose(co_json['pose'])
-            # TODO: Decide what to do with STL vs. Collada. The client has a Collada
+            # TODO: what to do with STL vs. Collada? The client has a Collada
             # loader but the PlanningSceneInterface can only deal with STL.
-            # TODO: Proper mapping between filenames and URLs
-            # filename = '/home/julian/aaad/moveit/src/moveit_web/django%s' % co_json['meshUrl']
+            # TODO: Proper mapping between filenames and URLs filename =
+            # '/home/julian/aaad/moveit/src/moveit_web/django%s' %
+            # co_json['meshUrl']
             filename = '/home/julian/aaad/moveit/src/moveit_web/django/static/meshes/table_4legs.stl'
             co = self.ps.make_mesh(co_json['name'], pose, filename)
             psw.collision_objects.append(co)
         self.psw_pub.publish(psw)
-
 
     def get_link_poses(self):
         if self.link_poses is None:
@@ -108,13 +108,21 @@ class Planner(object):
         goal_pose = self._make_pose(poses[0])
         self.move_group.set_pose_target(goal_pose)
         # self.move_group.set_pose_target(goal_pose,'base_footprint')
-        self.emit('status',{'text':'Starting to plan'})
+        self.emit('status', {'text': 'Starting to plan'})
         trajectory = self.move_group.plan()
-        if trajectory is None or len(trajectory.joint_trajectory.joint_names) == 0:
-            self.status = {'reachable':False,'text':'Ready to plan','ready':True}
+        number_of_joins = len(trajectory.joint_trajectory.joint_names)
+        if trajectory is None or number_of_joins == 0:
+            self.status = {
+                'reachable': False,
+                'text': 'Ready to plan',
+                'ready': True
+            }
             self.emit('status', self.status)
         else:
-            self.status = {'reachable':True,'text':'Rendering trajectory'}
+            self.status = {
+                'reachable': True,
+                'text': 'Rendering trajectory'
+            }
             self.emit('status', self.status)
             self.publish_trajectory(trajectory)
 
@@ -134,17 +142,18 @@ class Planner(object):
             point = trajectory.joint_trajectory.points[i]
             wait_duration = point.time_from_start - cur_time
             wait_duration_time = wait_duration.to_sec() + wait_duration.to_nsec() * 1e-9
-            gevent.sleep(wait_duration_time/acceleration)
+            gevent.sleep(wait_duration_time / acceleration)
             cur_time = point.time_from_start
             # self.publish_position(trajectory, i)
 
-            # TODO: Only say "True" to update state on the last step of the trajectory
-            new_poses = self._move_group.update_robot_state(trajectory.joint_trajectory.joint_names,
-                    list(trajectory.joint_trajectory.points[i].positions), True)
+            # TODO: "True" only to update state the last step of the trajectory
+            new_poses = self._move_group.update_robot_state(
+                trajectory.joint_trajectory.joint_names,
+                list(trajectory.joint_trajectory.points[i].positions), True)
             self.link_poses = new_poses
             self.emit('link_poses', new_poses)
 
-        self.status = {'text':'Ready to plan','ready':True}
+        self.status = {'text': 'Ready to plan', 'ready': True}
         self.emit('status', self.status)
 
 _planner = None

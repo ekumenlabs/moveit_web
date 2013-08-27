@@ -5,11 +5,13 @@ from bridge import get_planner
 import logging
 logger = logging.getLogger('moveit.socket')
 
+
 class PlanNamespace(BaseNamespace):
     name = '/plan'
 
     planner = None
     ready = False
+
     def on_connected(self, *args):
         logger.debug('user %s connected' % self.request.user)
         self.planner = get_planner()
