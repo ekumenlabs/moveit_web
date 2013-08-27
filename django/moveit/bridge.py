@@ -60,9 +60,6 @@ class Planner(object):
             pose = self._make_pose(co_json['pose'])
             # TODO: what to do with STL vs. Collada? The client has a Collada
             # loader but the PlanningSceneInterface can only deal with STL.
-            # TODO: Proper mapping between filenames and URLs filename =
-            # '/home/julian/aaad/moveit/src/moveit_web/django%s' %
-            # co_json['meshUrl']
             filename = os.path.join(meshes_root, 'table_4legs.stl')
             co = self.ps.make_mesh(co_json['name'], pose, filename)
             psw.collision_objects.append(co)
