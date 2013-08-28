@@ -1,30 +1,31 @@
 [
 {
-  "pk": 1, 
-  "model": "moveit.pose", 
+  "pk": 1,
+  "model": "moveit.pose",
   "fields": {
-    "orientation_w": 0.0, 
-    "orientation_z": 0.0, 
-    "orientation_x": 0.0, 
-    "orientation_y": 0.0, 
-    "position_z": 0.0, 
-    "position_x": 0.0, 
+    "orientation_w": 0.0,
+    "orientation_z": 0.0,
+    "orientation_x": 0.0,
+    "orientation_y": 0.0,
+    "position_z": 0.0,
+    "position_x": 0.0,
     "position_y": 0.0
   }
 },
 {
-  "pk": "A Table", 
-  "model": "moveit.scene", 
+  "pk": "A Table",
+  "model": "moveit.scene",
   "fields": {
-    "pose": 1, 
+    "pose": 1,
     "mesh_url": "meshes/table_4legs.dae"
+    "thumbnail_url": "scenes/0-thumb.png"
   }
 },
 {
-  "pk": "Blank", 
-  "model": "moveit.scene", 
+  "pk": "Blank",
+  "model": "moveit.scene",
   "fields": {
-    "pose": null, 
+    "pose": null,
     "mesh_url": ""
   }
 }

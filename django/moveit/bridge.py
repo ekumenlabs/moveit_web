@@ -7,6 +7,11 @@ from sensor_msgs.msg import JointState
 from rospy_message_converter import message_converter
 import gevent
 
+#
+# TODO: The planner instance should have an internal lock to prevent concurrent
+# namespaces to do monkey business.
+#
+
 
 class Planner(object):
     move_group = None
@@ -33,7 +38,6 @@ class Planner(object):
 
         # Give time for subscribers to connect to the publisher
         rospy.sleep(1)
-        self.goals = []
 
         # HACK: Synthesize a valid initial joint configuration for PR2
         initial_joint_state = JointState()
@@ -53,19 +57,23 @@ class Planner(object):
         return self.current_scene
 
     def set_scene(self, scene, meshes_root):
+        # TODO: lock down this method!
+
         self.current_scene = scene
         psw = PlanningSceneWorld()
-        co_json = scene['object']
 
-        # TODO: what to do with STL vs. Collada? The client has a Collada
-        # loader but the PlanningSceneInterface can only deal with STL.
-        filename = os.path.join(meshes_root, 'table_4legs.stl')
+        # If the scene has no pose, it has no objects
+        if scene.pose:
+            # TODO: what to do with STL vs. Collada? The client has a Collada
+            # loader but the PlanningSceneInterface can only deal with STL.
+            filename = os.path.join(meshes_root, scene.mesh_url)
 
-        # TODO: Fix orientation by using proper quaternions on the client
-        pose = self._make_pose(co_json['pose'])
+            # TODO: Fix orientation by using proper quaternions on the client
+            pose = self._make_pose(scene.pose)
 
-        co = self.ps.make_mesh(co_json['name'], pose, filename)
-        psw.collision_objects.append(co)
+            co = self.ps.make_mesh(scene.name, pose, filename)
+            psw.collision_objects.append(co)
+
         self.psw_pub.publish(psw)
 
     def get_link_poses(self):
@@ -89,20 +97,18 @@ class Planner(object):
         # goal_pose = self.move_group.get_random_pose('base_footprint')
         self.emit_new_goal(goal_pose)
 
-    def _make_pose(self, json_pose):
+    def _make_pose(self, pose):
         pose = PoseStamped()
         pose.header.frame_id = "odom_combined"
-        pp = json_pose['position']
-        pose.pose.position.x = pp['x']
-        pose.pose.position.y = pp['y']
-        pose.pose.position.z = pp['z']
+        pose.pose.position.x = pose.position_x
+        pose.pose.position.y = pose.position_y
+        pose.pose.position.z = pose.position_z
         # TODO: Orientation is not working. See about
         # properly using Quaternions everywhere
-        pp = json_pose['orientation']
-        pose.pose.orientation.x = pp['x']
-        pose.pose.orientation.y = pp['y']
-        pose.pose.orientation.z = pp['z']
-        pose.pose.orientation.w = pp['w']
+        pose.pose.orientation.x = pose.orientation_x
+        pose.pose.orientation.y = pose.orientation_y
+        pose.pose.orientation.z = pose.orientation_z
+        pose.pose.orientation.w = pose.orientation_w
         return pose
 
     def plan_to_poses(self, poses):
