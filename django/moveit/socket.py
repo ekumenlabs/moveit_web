@@ -29,7 +29,6 @@ class PlanNamespace(BaseNamespace):
             self.emit('current scene', {
                 'id': 1,
                 'name': 'Blank',
-                'objects': []
             })
 
     def on_goal_random(self, *args):

@@ -153,8 +153,7 @@ $(function(){
     } else {
       currentScene = {
         id: 1,
-        name: 'Blank',
-        object: null
+        name: 'Blank'
       };
     }
 
@@ -194,20 +193,24 @@ $(function(){
     _sceneObjects.forEach(function(object) {
       viewer.scene.remove(object);
     });
+    _sceneObjects = [];
 
     // Load new meshes and render them
     // TODO: Materials ???
-    currentScene.objects.forEach(function(object) {
+    if (currentScene.object) {
       var loader = new ColladaLoader2();
-      loader.load(object.meshUrl, function(dae){
+      loader.load(currentScene.object.meshUrl, function(dae){
+        var pose = currentScene.object.pose;
         var scene = dae.scene;
-        mixin(scene.position, object.pose.position);
+
         // TODO: Use Quaternion
-        mixin(scene.rotation, object.pose.orientation);
+        mixin(scene.rotation, pose.orientation);
+        mixin(scene.position, pose.position);
+
         viewer.scene.add(scene);
         _sceneObjects.push(scene);
       });
-    });
+    }
   }
 
 
