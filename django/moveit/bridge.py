@@ -55,14 +55,17 @@ class Planner(object):
     def set_scene(self, scene, meshes_root):
         self.current_scene = scene
         psw = PlanningSceneWorld()
-        for co_json in scene['objects']:
-            # TODO: Fix orientation by using proper quaternions on the client
-            pose = self._make_pose(co_json['pose'])
-            # TODO: what to do with STL vs. Collada? The client has a Collada
-            # loader but the PlanningSceneInterface can only deal with STL.
-            filename = os.path.join(meshes_root, 'table_4legs.stl')
-            co = self.ps.make_mesh(co_json['name'], pose, filename)
-            psw.collision_objects.append(co)
+        co_json = scene['object']
+
+        # TODO: what to do with STL vs. Collada? The client has a Collada
+        # loader but the PlanningSceneInterface can only deal with STL.
+        filename = os.path.join(meshes_root, 'table_4legs.stl')
+
+        # TODO: Fix orientation by using proper quaternions on the client
+        pose = self._make_pose(co_json['pose'])
+
+        co = self.ps.make_mesh(co_json['name'], pose, filename)
+        psw.collision_objects.append(co)
         self.psw_pub.publish(psw)
 
     def get_link_poses(self):

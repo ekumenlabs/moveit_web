@@ -1,4 +1,4 @@
-var model, urdf, table, viewer;
+var model, urdf, viewer;
 $(function(){
   console.log("starting");
 
@@ -24,7 +24,7 @@ $(function(){
       path: 'http://resources.robotwebtools.org/',
       tfClient: {
         subscribe: function() {}
-      } 
+      }
     });
     urdf = theURDF;
     viewer.addObject(theURDF);
@@ -137,7 +137,7 @@ $(function(){
       currentScene = {
         id: 0,
         name: 'A Table',
-        objects: [{
+        object: {
           id: 0,
           name: 'table 0',
           meshUrl: '/static/meshes/table_4legs.dae',
@@ -145,29 +145,13 @@ $(function(){
             position: { x: 0.5, y: -1, z: 0 },
             orientation: { x: 0, y: 0, z: 0, w: 0 }
           }
-        },{
-          id: 1,
-          name: 'table 1',
-          meshUrl: '/static/meshes/table_4legs.dae',
-          pose: {
-            position: { x: 0.5, y: -2.5, z: 0 },
-            orientation: { x: 0, y: 0, z: 0, w: 0 }
-          }
-        },{
-          id: 2,
-          name: 'table 2',
-          meshUrl: '/static/meshes/table_4legs.dae',
-          pose: {
-            position: { x: 0.5, y: -2.5, z: 0 },
-            orientation: { x: 0, y: 0, z: 3.14159/2.0, w: 0 }
-          }
-        }]
+        }
       };
     } else {
       currentScene = {
         id: 1,
         name: 'Blank',
-        objects: []
+        object: null
       };
     }
 
@@ -214,7 +198,6 @@ $(function(){
       var loader = new ColladaLoader2();
       loader.load(object.meshUrl, function(dae){
         var scene = dae.scene;
-        table = scene;
         mixin(scene.position, object.pose.position);
         // TODO: Use Quaternion
         mixin(scene.rotation, object.pose.orientation);
