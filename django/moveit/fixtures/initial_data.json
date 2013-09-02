@@ -17,7 +17,7 @@
   "model": "moveit.scene",
   "fields": {
     "pose": 1,
-    "mesh_url": "meshes/table_4legs.dae"
+    "mesh_url": "meshes/table_4legs.dae",
     "thumbnail_url": "scenes/0-thumb.png"
   }
 },

@@ -1,4 +1,4 @@
-var model, urdf, viewer;
+var model, urdf, table, viewer;
 $(function(){
   console.log("starting");
 
