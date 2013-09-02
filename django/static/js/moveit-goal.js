@@ -76,22 +76,24 @@ Axes.prototype.__proto__ = THREE.Object3D.prototype;
 //
 // @param pose (optional) - ROSLIB.Pose object to call setPose() with.
 // @param scene (optional) - THREE.Scene object (as in ``new ROS3D.Viewer().scene``) to add the goal to.
-// @param status (optional) - One amongst "unknown", "unreachable" and "reachable", to define the goal colour.
+// @param status (optional) - One amongst "unknown", "unreachable" and "reachable", to define the goal color.
 MoveItGoal = function (pose, scene) {
+  this.group = new THREE.Object3D();
+
   // Signal THREE.js this objects use quaternions to express local rotations
-  this.useQuaternion = true;
+  this.group.useQuaternion = true;
 
   // contruct the small dot to show the position
   var dot_mesh = new THREE.Mesh(
-    MoveItGoal.dotGeometry,
-    MoveItGoal.statusMaterials.unknown
+    new THREE.SphereGeometry(0.03,0.03,0.03),
+    new THREE.MeshBasicMaterial({ color: MoveItGoal.stateColors.unknown })
   );
   this.dot = dot_mesh;
-  this.add(dot_mesh);
+  this.group.add(dot_mesh);
 
   // construct the axes, and keep a reference to show rotations
   var axes = new Axes();
-  this.add(axes);
+  this.group.add(axes);
 
   // add this goal to the general repository
   MoveItGoal.all.push(this);
@@ -100,10 +102,10 @@ MoveItGoal = function (pose, scene) {
   pose && this.setPose(pose);
 
   // add to the scene, if given
-  scene && scene.add(this);
+  scene && scene.add(this.group);
 
-  // set the goal colour
-  status && this.setStatus(status) || this.setStatus('unknown');
+  // set the goal color
+  status && this.setStatus(status);
 }
 
 // One repository for all goals created.
@@ -112,13 +114,11 @@ MoveItGoal = function (pose, scene) {
 // memory as a one "clearAll()" call.
 MoveItGoal.all = [];
 
-MoveItGoal.dotGeometry = new THREE.SphereGeometry(0.03,0.03,0.03);
-
-MoveItGoal.statusMaterials = {
-  unknown: new THREE.MeshBasicMaterial({ color: 0xffffff }),
-  reachable: new THREE.MeshBasicMaterial({ color: 0x00ff00 }),
-  unreachable: new THREE.MeshBasicMaterial({ color: 0xff0000 })
-};
+MoveItGoal.stateColors = {
+  unknown: 0xffffff,
+  reachable: 0x00ff00,
+  unreachable: 0xff0000
+}
 
 // Returns a reference to the last goal created, null if there's none.
 MoveItGoal.latest = function () {
@@ -127,8 +127,6 @@ MoveItGoal.latest = function () {
     return MoveItGoal.all[len - 1];
   return null;
 }
-
-MoveItGoal.prototype = new THREE.Object3D();
 
 // Set both position and orientation (using a quaternion).
 MoveItGoal.prototype.setPose = function (pose) {
@@ -142,15 +140,17 @@ MoveItGoal.prototype.setPose = function (pose) {
 MoveItGoal.prototype.setPosition = function (position) {
   // NOTE that a ROSLIB.Vector3 is not a THREE.Vector3... it doesn't even share
   // a prototype, _as it should_. Check out the code and see.
-  this.position.x = position.x;
-  this.position.y = position.y;
-  this.position.z = position.z;
+  this.group.position = new THREE.Vector3(
+    position.x,
+    position.y,
+    position.z
+  );
 }
 
 MoveItGoal.prototype.setOrientation = function (orientation) {
   // NOTE that a ROSLIB.Quaternion is not a THREE.Quaternion... it doesn't even
   // share a prototype, _as it should_. Check out the code and see.
-  this.quaternion = new THREE.Quaternion(
+  this.group.quaternion = new THREE.Quaternion(
     orientation.x,
     orientation.y,
     orientation.z,
@@ -158,21 +158,10 @@ MoveItGoal.prototype.setOrientation = function (orientation) {
   );
 }
 
-MoveItGoal.materials = {
-  unknown: new THREE.MeshBasicMaterial({ color: 0xffffff }),
-  reachable: new THREE.MeshBasicMaterial({ color: 0x00ff00 }),
-  unreachable: new THREE.MeshBasicMaterial({ color: 0xff0000 })
-}
-
 MoveItGoal.prototype.setStatus = function (status) {
-  var which = null;
-
-  switch (status) {
-    case "unknown": which = MoveItGoal.materials.unknown; break;
-    case "reachable": which = MoveItGoal.materials.reachable; break;
-    case "unreachable": which = MoveItGoal.materials.unreachable; break;
-    default:
-      throw new Error("unknown goal status");
+  if (status in MoveItGoal.stateColors) {
+    this.dot.material.color.setHex(MoveItGoal.stateColors[status]);
+  } else {
+    throw new Error("unknown goal status");
   }
-  this.dot.material = which;
 }

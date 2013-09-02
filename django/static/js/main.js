@@ -59,7 +59,7 @@ $(function(){
   });
   $('#clear').on('click',function(ev){
     MoveItGoal.all.forEach(function(goal){
-      viewer.scene.remove(goal);
+      viewer.scene.remove(goal.group);
     });
   });
   $('#scene-load').on('click',function(ev){
@@ -73,13 +73,13 @@ $(function(){
   var plan = io.connect('/plan');
   plan.on('status',function(statusMessage){
     if('text' in statusMessage) {
-       $('#status-message').html(statusMessage['text']);
+       $('#status-message').html(statusMessage.text);
     }
-    if('reachable' in statusMessage) {
+    if (('reachable' in statusMessage) && MoveItGoal.latest()){
       if (statusMessage.reachable) MoveItGoal.latest().setStatus('reachable');
       else MoveItGoal.latest().setStatus('unreachable');
     }
-    if('ready' in statusMessage && statusMessage['ready']) {
+    if('ready' in statusMessage && statusMessage.ready) {
       $('#run').removeAttr('disabled');
       $('#run').html('Run');
     }
@@ -113,13 +113,8 @@ $(function(){
     addGoal(pose);
   });
 
-  var unknownColor = new THREE.MeshBasicMaterial( { color: 0xffffff } );
-  var reachableColor = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-  var unreachableColor = new THREE.MeshBasicMaterial( { color: 0xff0000 } );
-  var goals = [];
-  var currentGoal;
   function addGoal(pose) {
-    var goal = new MoveItGoal(pose, viewer.scene);
+    new MoveItGoal(pose, viewer.scene);
   }
 
   // --------------- SCENES -------------------------
