@@ -26,7 +26,8 @@ Axes = function(options) {
     isLong = isLong || false;
 
     var lengthFactor = shortLine;
-    var colorHex = 0x0000ff;
+    var colorHex = axis.y ? 0x00ff00 : 0x0000ff;
+
     var shaftLength = (shortLine - headLength) * scalarFactor;
     if (isLong) {
       var lengthFactor = longLine;
