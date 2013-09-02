@@ -76,6 +76,7 @@ Axes.prototype.__proto__ = THREE.Object3D.prototype;
 //
 // @param pose (optional) - ROSLIB.Pose object to call setPose() with.
 // @param scene (optional) - THREE.Scene object (as in ``new ROS3D.Viewer().scene``) to add the goal to.
+// @param status (optional) - One amongst "unknown", "unreachable" and "reachable", to define the goal colour.
 MoveItGoal = function (pose, scene) {
   // Signal THREE.js this objects use quaternions to express local rotations
   this.useQuaternion = true;
@@ -85,6 +86,7 @@ MoveItGoal = function (pose, scene) {
     MoveItGoal.dotGeometry,
     MoveItGoal.statusMaterials.unknown
   );
+  this.dot = dot_mesh;
   this.add(dot_mesh);
 
   // construct the axes, and keep a reference to show rotations
@@ -99,6 +101,9 @@ MoveItGoal = function (pose, scene) {
 
   // add to the scene, if given
   scene && scene.add(this);
+
+  // set the goal colour
+  status && this.setStatus(status) || this.setStatus('unknown');
 }
 
 // One repository for all goals created.
@@ -151,4 +156,23 @@ MoveItGoal.prototype.setOrientation = function (orientation) {
     orientation.z,
     orientation.w
   );
+}
+
+MoveItGoal.materials = {
+  unknown: new THREE.MeshBasicMaterial({ color: 0xffffff }),
+  reachable: new THREE.MeshBasicMaterial({ color: 0x00ff00 }),
+  unreachable: new THREE.MeshBasicMaterial({ color: 0xff0000 })
+}
+
+MoveItGoal.prototype.setStatus = function (status) {
+  var which = null;
+
+  switch (status) {
+    case "unknown": which = MoveItGoal.materials.unknown; break;
+    case "reachable": which = MoveItGoal.materials.reachable; break;
+    case "unreachable": which = MoveItGoal.materials.unreachable; break;
+    default:
+      throw new Error("unknown goal status");
+  }
+  this.dot.material = which;
 }

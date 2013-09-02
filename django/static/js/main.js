@@ -76,7 +76,8 @@ $(function(){
        $('#status-message').html(statusMessage['text']);
     }
     if('reachable' in statusMessage) {
-      MoveItGoal.latest().material = statusMessage['reachable']?reachableColor:unreachableColor;
+      if (statusMessage.reachable) MoveItGoal.latest().setStatus('reachable');
+      else MoveItGoal.latest().setStatus('unreachable');
     }
     if('ready' in statusMessage && statusMessage['ready']) {
       $('#run').removeAttr('disabled');
@@ -119,17 +120,6 @@ $(function(){
   var currentGoal;
   function addGoal(pose) {
     var goal = new MoveItGoal(pose, viewer.scene);
-  }
-  function addGoal_(pose) {
-    console.log('goal pose: ', pose);
-    position = pose.position;
-    var geometry = new THREE.SphereGeometry(0.03,0.03,0.03);
-    var material = unknownColor;
-    currentGoal = new THREE.Mesh( geometry, material );
-    currentGoal.position.set(position.x, position.y, position.z);
-    currentGoal.pose = pose;
-    viewer.scene.add(currentGoal);
-    goals.push(currentGoal);
   }
 
   // --------------- SCENES -------------------------
