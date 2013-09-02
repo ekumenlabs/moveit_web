@@ -68,7 +68,6 @@ class Planner(object):
             # loader but the PlanningSceneInterface can only deal with STL.
             filename = os.path.join(meshes_root, scene.mesh_url)
 
-            # TODO: Fix orientation by using proper quaternions on the client
             pose = self._make_pose(scene.pose)
 
             co = self.ps.make_mesh(scene.name, pose, filename)
@@ -97,18 +96,16 @@ class Planner(object):
         # goal_pose = self.move_group.get_random_pose('base_footprint')
         self.emit_new_goal(goal_pose)
 
-    def _make_pose(self, pose):
+    def _make_pose(self, pose_data):
         pose = PoseStamped()
         pose.header.frame_id = "odom_combined"
-        pose.pose.position.x = pose.position_x
-        pose.pose.position.y = pose.position_y
-        pose.pose.position.z = pose.position_z
-        # TODO: Orientation is not working. See about
-        # properly using Quaternions everywhere
-        pose.pose.orientation.x = pose.orientation_x
-        pose.pose.orientation.y = pose.orientation_y
-        pose.pose.orientation.z = pose.orientation_z
-        pose.pose.orientation.w = pose.orientation_w
+        pose.pose.position.x = pose_data.position_x
+        pose.pose.position.y = pose_data.position_y
+        pose.pose.position.z = pose_data.position_z
+        pose.pose.orientation.x = pose_data.orientation_x
+        pose.pose.orientation.y = pose_data.orientation_y
+        pose.pose.orientation.z = pose_data.orientation_z
+        pose.pose.orientation.w = pose_data.orientation_w
         return pose
 
     def plan_to_poses(self, poses):

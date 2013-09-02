@@ -43,9 +43,15 @@ class PlanNamespace(BaseNamespace):
         if self.ready:
             self.emit('link_poses', self.planner.get_link_poses())
 
-    def on_scene_changed(self, scene_name):
+    def on_change_scene(self, scene_name):
+        # This method does two things:
+        # * set the scene for the MoveIt! layer
+        # * send the scene data to the client
+        # Although both operations can be performed in parallel, they are here
+        # done sequentially in the interest of KISS
         try:
             scene = Scene.objects.get(name=scene_name)
             self.planner.set_scene(scene, MESHES_ROOT)
+            self.emit('changed scene', scene)
         except Scene.DoesNotExist:
-            pass
+            logger.error('Client tried to change to an inexistent scene.')

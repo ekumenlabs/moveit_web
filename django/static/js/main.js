@@ -97,6 +97,7 @@ $(function(){
     currentScene = scene;
     renderScene();
   });
+  plan.on('scene changed', loadScene);
 
   // -------------- GOALS ---------------------------
   $('#goal-make').on('click',function(ev){
@@ -120,49 +121,27 @@ $(function(){
   function addGoal(pose) {
     var goal = new MoveItGoal(pose, viewer.scene);
   }
-  function addGoal_(pose) {
-    console.log('goal pose: ', pose);
-    position = pose.position;
-    var geometry = new THREE.SphereGeometry(0.03,0.03,0.03);
-    var material = unknownColor;
-    currentGoal = new THREE.Mesh( geometry, material );
-    currentGoal.position.set(position.x, position.y, position.z);
-    currentGoal.pose = pose;
-    viewer.scene.add(currentGoal);
-    goals.push(currentGoal);
-  }
 
   // --------------- SCENES -------------------------
-  var currentScene;
-  function loadScene(sceneId) {
-    if(sceneId == 0) {
-      // This would be a database object describing the scene
-      currentScene = {
-        id: 0,
-        name: 'A Table',
-        object: {
-          id: 0,
-          name: 'table 0',
-          meshUrl: '/static/meshes/table_4legs.dae',
-          pose: {
-            position: { x: 0.5, y: -1, z: 0 },
-            orientation: { x: 0, y: 0, z: 0, w: 0 }
-          }
-        }
-      };
-    } else {
-      currentScene = {
-        id: 1,
-        name: 'Blank'
-      };
-    }
+  //
+  // 1. User selects a scene from the menu
+  // 2. Browser emits 'change scene' with the name of the new scene
+  // 3. Server queries DB for scene with that name
+  // 4. Server sets the scene in MoveIt! backend
+  // 5. Server emits 'scene changed' with serialized data of the scene.
+  //    The scene data includes:
+  //      * the name (which is known to the client)
+  //      * the thumbnail URL (which is known to the client)
+  //      * the mesh URL
+  //      * the pose, as a JSON object
+  var currentScene; // this global might not be necessary anymore.
 
+  // React to a scene change.
+  function loadScene(scene) {
+    currentScene = scene;
     renderScene();
-
-    // NOTE: The scene is set on the back-end regardless
-    // of the result of loading the client scene
-    plan.emit('scene_changed', currentScene);
   }
+  // Produce a scene change.
   function selectScene() {
     $('#canvas').hide();
     $('#scene-choose').show();
@@ -178,7 +157,8 @@ $(function(){
     $('#scene-select-done').one('click',function(ev){
       $('#scene-choose').hide();
       $('#canvas').show();
-      loadScene(Number(picker.selectedOptions[0].value));
+      var sceneName = picker.selectedOptions[0].value;
+      plan.emit('change scene', sceneName);
     });
   }
 
@@ -197,10 +177,10 @@ $(function(){
 
     // Load new meshes and render them
     // TODO: Materials ???
-    if (currentScene.object) {
+    if (currentScene.meshUrl) {
       var loader = new ColladaLoader2();
-      loader.load(currentScene.object.meshUrl, function(dae){
-        var pose = currentScene.object.pose;
+      loader.load(currentScene.meshUrl, function(dae){
+        var pose = currentScene.pose;
         var scene = dae.scene;
 
         // TODO: Use Quaternion
@@ -212,7 +192,6 @@ $(function(){
       });
     }
   }
-
 
   // -------------- UTILS --------------
   function mixin(into, what) {
