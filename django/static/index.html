@@ -98,6 +98,13 @@
                       <option data-img-src="/static/scenes/0-thumb.png" value="0">A Table</option>
                     </select>
                   </td></tr>
+                  <tr><td>
+                    <p>...Or upload your own!</p>
+                    <form id="post-scene" method="post" action="/scene/new" enctype="multipart/form-data">
+                      <input name="payload" type="file" placeholder="upload a zip file..." />
+                      <input name="send" type="submit" value="Send it!" />
+                    </form>
+                  </td></tr>
                 </table>
               </div>
             </div>
