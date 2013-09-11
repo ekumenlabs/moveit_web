@@ -9,8 +9,11 @@ from moveit.socket import PlanNamespace
 
 from socketio import socketio_manage
 
+
 def socketio_hookup(request):
-    socketio_manage(request.environ, {PlanNamespace.name: PlanNamespace}, request)
+    socketio_manage(request.environ,
+                    {PlanNamespace.name: PlanNamespace},
+                    request)
     return HttpResponse("Socket connection ended")
 
 # Uncomment the next two lines to enable the admin:
@@ -32,8 +35,11 @@ urlpatterns = patterns('',
     url(r'^goals$', 'moveit.views.goals'),
     url(r'^run$', 'moveit.views.run'),
 
+    # Handle a user-posted scene
+    url(r'^scene/new$', 'moveit.views.new_scene'),
+
     # Main entry point: redirect to app
-    url(r'^$', RedirectView.as_view(url='/static/index.html')),
+    url(r'^$', RedirectView.as_view(url='/static/index.html'), name='home'),
 
     # Connect to socketio namespace
     url(r'^socket\.io', socketio_hookup),
